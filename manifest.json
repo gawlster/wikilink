@@ -1,0 +1,17 @@
+{
+    "name": "Wikepedia Game",
+    "description": "A game to navigate between Wikipedia articles.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "action": {
+        "default_popup": "index.html",
+        "default_icon": "icon.png"
+    },
+    "permissions": [
+        "tabs",
+        "storage"
+    ],
+    "host_permissions": [
+        "https://en.wikipedia.org/*"
+    ]
+}
