@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "build": "esbuild src/index.ts --outfile=dist/index.js --bundle --format=esm"
+        "build": "esbuild src/popup.ts --outfile=dist/popup.js --bundle --format=esm && esbuild src/background.ts --outfile=dist/background.js --bundle --format=esm",
     },
     "keywords": [],
     "author": "",
