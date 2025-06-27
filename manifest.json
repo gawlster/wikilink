@@ -12,7 +12,10 @@
     },
     "permissions": [
         "tabs",
-        "storage"
+        "storage",
+        "scripting",
+        "notifications",
+        "webNavigation"
     ],
     "host_permissions": [
         "https://en.wikipedia.org/*"

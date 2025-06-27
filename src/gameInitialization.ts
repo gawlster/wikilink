@@ -1,73 +1,89 @@
-import { Game, type Article } from "./game"
+import { StartGameMessageData } from "./background";
 
-export async function getRandomArticle(): Promise<Article> {
+/**
+ * Get a random Wikipedia article URL.
+ */
+export async function getRandomArticleUrl(): Promise<string> {
     const res = await fetch("https://en.wikipedia.org/wiki/Special:Random", { redirect: "follow" });
-    const url = res.url;
-    return {
-        title: decodeURIComponent(url.split("/").pop() || ""),
-        url
-    }
+    return res.url;
 }
 
-export async function getOutgoingArticles(article: Article): Promise<Article[]> {
-    const url = `https://en.wikipedia.org/w/api.php?origin=*&action=query&format=json&prop=links&titles=${encodeURIComponent(article.title)}&pllimit=max`;
-    const res = await fetch(url);
+/**
+ * Extract the article title from a full Wikipedia URL.
+ */
+function getTitleFromUrl(url: string): string {
+    const parts = url.split("/wiki/");
+    return decodeURIComponent(parts[1] || "");
+}
+
+/**
+ * Get outgoing article URLs linked from a given Wikipedia page.
+ */
+export async function getOutgoingArticleUrls(articleUrl: string): Promise<string[]> {
+    const articleTitle = getTitleFromUrl(articleUrl);
+
+    const apiUrl = `https://en.wikipedia.org/w/api.php` +
+        `?action=query&prop=links&pllimit=max&format=json&origin=*` +
+        `&titles=${encodeURIComponent(articleTitle)}`;
+
+    const res = await fetch(apiUrl);
     const data = await res.json();
+
     const page = Object.values(data.query.pages)[0] as { links?: { title: string }[] };
-    const links = page.links || [];
+    const links = page.links ?? [];
 
     return links
         .filter(link => !link.title.startsWith("List of") && !link.title.includes(":"))
-        .map(link => ({ title: link.title, url: `https://en.wikipedia.org/wiki/${encodeURIComponent(link.title)}` }));
+        .map(link => `https://en.wikipedia.org/wiki/${encodeURIComponent(link.title)}`);
 }
 
-export async function getPathOfExactLength(startarticle: Article, steps: number): Promise<Article> {
-    const visited = new Set<Article>();
-    let currentArticle = startarticle;
+/**
+ * Given a starting article, walk exactly `steps` random hops and return the ending article URL.
+ */
+export async function walkRandomPath(startUrl: string, steps: number): Promise<string> {
+    const visited = new Set<string>();
+    let currentUrl = startUrl;
 
     for (let i = 0; i < steps; i++) {
-        visited.add(currentArticle);
-        const links = await getOutgoingArticles(currentArticle);
-        const candidates = links.filter(link => !Array.from(visited).map(article => article.title).includes(link.title));
+        visited.add(currentUrl);
+
+        const links = await getOutgoingArticleUrls(currentUrl);
+        const candidates = links.filter(url => !visited.has(url));
 
         if (candidates.length === 0) {
-            throw new Error(`Dead end at step ${i} from ${currentArticle.title}`);
+            throw new Error(`Dead end after ${i} steps at ${currentUrl}`);
         }
 
-        currentArticle = candidates[Math.floor(Math.random() * candidates.length)];
+        currentUrl = candidates[Math.floor(Math.random() * candidates.length)];
+        console.log(currentUrl);
     }
 
-    return currentArticle;
+    return currentUrl;
 }
 
-export async function getCurrentGameOrCreateNew(): Promise<Game> {
-    const game = new Game();
+/**
+ * Get a random start and end article URL, where the end is 5–8 steps away.
+ */
+export async function getRandomStartAndEnd(): Promise<StartGameMessageData> {
+    let startingArticleUrl = await getRandomArticleUrl();
+    let endingArticleUrl: string;
+    let minSteps = 0;
 
-    try {
-        game.ParseGameData(await chrome.storage.local.get(["gameData"]));
-        console.log("Game data loaded successfully.");
-    } catch (error) {
-        console.error("Error loading game data:", error);
-        game.ResetGame();
-
-        game.startingArticle = await getRandomArticle();
-        while (true) {
-            try {
-                game.endingArticle = await getPathOfExactLength(game.startingArticle, game.totalSteps);
-                break;
-            } catch (error) {
-                console.error(error);
-                game.startingArticle = await getRandomArticle();
-                console.log(`Retrying with new start article: ${game.startingArticle.title}`);
-            }
+    while (true) {
+        try {
+            minSteps = 5 + Math.floor(Math.random() * 4); // 5–8 inclusive
+            endingArticleUrl = await walkRandomPath(startingArticleUrl, minSteps);
+            break;
+        } catch (err) {
+            console.error(err);
+            startingArticleUrl = await getRandomArticleUrl();
+            console.log(`Retrying with new start article: ${startingArticleUrl}`);
         }
-        game.currentArticle = game.startingArticle;
-        game.stepsRemaining = game.totalSteps;
-        game.stepsTaken = [];
-        game.gameOver = false;
-        await chrome.storage.local.set({ gameData: game.GetGameData() });
-        console.log("New game initialized and saved.")
     }
 
-    return game;
+    return {
+        startingArticleUrl,
+        endingArticleUrl,
+        minSteps
+    };
 }
