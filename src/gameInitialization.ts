@@ -1,25 +1,18 @@
 import { StartGameMessageData } from "./background";
+import { getTitleFromUrl } from "./utils";
 
 /**
  * Get a random Wikipedia article URL.
  */
-export async function getRandomArticleUrl(): Promise<string> {
+async function getRandomArticleUrl(): Promise<string> {
     const res = await fetch("https://en.wikipedia.org/wiki/Special:Random", { redirect: "follow" });
     return res.url;
 }
 
 /**
- * Extract the article title from a full Wikipedia URL.
- */
-export function getTitleFromUrl(url: string): string {
-    const parts = url.split("/wiki/");
-    return decodeURIComponent(parts[1] || "");
-}
-
-/**
  * Get outgoing article URLs linked from a given Wikipedia page.
  */
-export async function getOutgoingArticleUrls(articleUrl: string): Promise<string[]> {
+async function getOutgoingArticleUrls(articleUrl: string): Promise<string[]> {
     const articleTitle = getTitleFromUrl(articleUrl);
 
     const apiUrl = `https://en.wikipedia.org/w/api.php` +
@@ -40,7 +33,7 @@ export async function getOutgoingArticleUrls(articleUrl: string): Promise<string
 /**
  * Given a starting article, walk exactly `steps` random hops and return the ending article URL.
  */
-export async function walkRandomPath(startUrl: string, steps: number): Promise<string> {
+async function walkRandomPath(startUrl: string, steps: number): Promise<string> {
     const visited = new Set<string>();
     let currentUrl = startUrl;
 
@@ -61,7 +54,7 @@ export async function walkRandomPath(startUrl: string, steps: number): Promise<s
 }
 
 /**
- * Get a random start and end article URL, where the end is 5–8 steps away.
+ * Get a random start and end article URL, where the end is 3-5 steps away.
  */
 export async function getRandomStartAndEnd(): Promise<StartGameMessageData> {
     let startingArticleUrl = await getRandomArticleUrl();

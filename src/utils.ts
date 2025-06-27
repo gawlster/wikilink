@@ -18,3 +18,11 @@ export function areArticlesTheSame(urlA: string, urlB: string): boolean {
     const titleB = getNormalizedTitle(urlB).toLowerCase();
     return titleA === titleB;
 }
+
+/**
+ * Extract the article title from a full Wikipedia URL.
+ */
+export function getTitleFromUrl(url: string): string {
+    const parts = url.split("/wiki/");
+    return decodeURIComponent(parts[1] || "");
+}
