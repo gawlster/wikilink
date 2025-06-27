@@ -11,7 +11,7 @@ export async function getRandomArticleUrl(): Promise<string> {
 /**
  * Extract the article title from a full Wikipedia URL.
  */
-function getTitleFromUrl(url: string): string {
+export function getTitleFromUrl(url: string): string {
     const parts = url.split("/wiki/");
     return decodeURIComponent(parts[1] || "");
 }
@@ -55,7 +55,6 @@ export async function walkRandomPath(startUrl: string, steps: number): Promise<s
         }
 
         currentUrl = candidates[Math.floor(Math.random() * candidates.length)];
-        console.log(currentUrl);
     }
 
     return currentUrl;
@@ -71,7 +70,7 @@ export async function getRandomStartAndEnd(): Promise<StartGameMessageData> {
 
     while (true) {
         try {
-            minSteps = 5 + Math.floor(Math.random() * 4); // 5–8 inclusive
+            minSteps = Math.floor(Math.random() * 3) + 3; // 3 to 5 inclusive
             endingArticleUrl = await walkRandomPath(startingArticleUrl, minSteps);
             break;
         } catch (err) {

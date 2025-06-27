@@ -1,33 +1,81 @@
-import { getRandomStartAndEnd } from "./gameInitialization";
+import { getRandomStartAndEnd, getTitleFromUrl } from "./gameInitialization";
+import "./components/testing"
+
+async function populateStateToHTML() {
+    const stepsTakenState = await chrome.storage.local.get("stepsTaken");
+    const stepsTaken = stepsTakenState.stepsTaken || 0;
+    const stepsTakenElements = document.getElementsByClassName("steps-taken");
+    for (const element of stepsTakenElements) {
+        if (element instanceof HTMLElement) {
+            element.textContent = stepsTaken.toString();
+        }
+    }
+
+    const startPageState = await chrome.storage.local.get("startingArticleUrl");
+    const startPage = startPageState.startingArticleUrl || "Unknown";
+    const startPageElements = document.getElementsByClassName("start-page");
+    for (const element of startPageElements) {
+        if (element instanceof HTMLElement) {
+            element.textContent = getTitleFromUrl(startPage) || "Unknown";
+            element.style.fontWeight = "bold";
+        }
+    }
+
+    const endPageState = await chrome.storage.local.get("endingArticleUrl");
+    const endPage = endPageState.endingArticleUrl || "Unknown";
+    const endPageElements = document.getElementsByClassName("end-page");
+    for (const element of endPageElements) {
+        if (element instanceof HTMLElement) {
+            element.textContent = getTitleFromUrl(endPage) || "Unknown";
+            element.style.fontWeight = "bold";
+        }
+    }
+
+    const minStepsState = await chrome.storage.local.get("minSteps");
+    const minSteps = minStepsState.minSteps || 0;
+    const minStepsElements = document.getElementsByClassName("min-steps");
+    for (const element of minStepsElements) {
+        if (element instanceof HTMLElement) {
+            element.textContent = minSteps.toString();
+        }
+    }
+}
 
 async function main(): Promise<void> {
     const loading = document.getElementById("loading") as HTMLElement;
-    const content = document.getElementById("content") as HTMLElement;
-    const startButton = document.getElementById("start-button") as HTMLAnchorElement;
-    const endButton = document.getElementById("end-button") as HTMLAnchorElement;
-    const stepsText = document.getElementById("steps") as HTMLElement;
+    const won = document.getElementById("won") as HTMLElement;
+    const gameInProgress = document.getElementById("game-in-progress") as HTMLElement;
+    const noGameInProgress = document.getElementById("no-game-in-progress") as HTMLElement;
 
-    const gameInProgress = await chrome.storage.local.get("gameInProgress");
-    if (gameInProgress.gameInProgress) {
-        console.log("Game in progress")
-        return;
+    await populateStateToHTML();
+    const startGameButtons = document.getElementsByClassName("start-game-button");
+    for (const button of startGameButtons) {
+        console.log(button)
+        if (button instanceof HTMLButtonElement) {
+            console.log("Adding click listener to button");
+            button.addEventListener("click", async () => {
+                console.log("Start game button clicked");
+                const gameData = await getRandomStartAndEnd();
+                chrome.runtime.sendMessage({
+                    type: "OpenStartArticle",
+                    gameData
+                })
+            });
+        }
     }
 
-    const gameData = await getRandomStartAndEnd();
+    const hasWonState = await chrome.storage.local.get("hasWon");
+    const gameInProgressState = await chrome.storage.local.get("gameInProgress");
 
-    startButton.textContent = decodeURIComponent(gameData.startingArticleUrl.split("/").pop() || "");
-    endButton.textContent = decodeURIComponent(gameData.endingArticleUrl.split("/").pop() || "");
-    stepsText.textContent = `Best score: ${gameData.minSteps} steps`;
-
-    startButton.addEventListener("click", () => {
-        chrome.runtime.sendMessage({
-            type: "OpenStartArticle",
-            gameData
-        })
-    });
+    if (hasWonState.hasWon) {
+        won.style.display = "block";
+    } else if (gameInProgressState.gameInProgress) {
+        gameInProgress.style.display = "block";
+    } else {
+        noGameInProgress.style.display = "block";
+    }
 
     loading.style.display = "none";
-    content.style.display = "block";
 }
 
 main().catch(console.error);

@@ -6,6 +6,7 @@ let startingArticleUrl = "";
 let endingArticleUrl = "";
 let minSteps = -1;
 let stepsTaken = 0;
+let hasWon = false;
 
 export type StartGameMessageData = {
     startingArticleUrl: string;
@@ -35,6 +36,7 @@ async function resetGame(): Promise<void> {
     minSteps = -1;
     stepsTaken = 0;
     currentTabId = -1;
+    hasWon = false;
     await updateGameStorage();
 }
 
@@ -45,7 +47,8 @@ async function updateGameStorage(): Promise<void> {
         startingArticleUrl,
         endingArticleUrl,
         minSteps,
-        stepsTaken
+        stepsTaken,
+        hasWon
     })
 }
 
@@ -59,8 +62,9 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         startingArticleUrl = gameData.startingArticleUrl;
         endingArticleUrl = gameData.endingArticleUrl;
         minSteps = gameData.minSteps;
-        stepsTaken = 0;
+        stepsTaken = -1; // Start at -1 to count the first step as 0
         gameInProgress = true;
+        hasWon = false;
         await updateGameStorage();
         chrome.tabs.create({ url: startingArticleUrl }, async (tab) => {
             if (chrome.runtime.lastError) {
@@ -89,6 +93,9 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+    if (hasWon) {
+        return;
+    }
     if (tabId === currentTabId) {
         chrome.notifications.create({
             type: "basic",
@@ -101,7 +108,7 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
 });
 
 chrome.webNavigation.onCommitted.addListener(async (details) => {
-    if (details.tabId !== currentTabId) {
+    if (hasWon || details.tabId !== currentTabId) {
         return;
     }
     if (details.transitionType !== "link") {
@@ -114,6 +121,7 @@ chrome.webNavigation.onCommitted.addListener(async (details) => {
         await resetGame();
         return;
     }
+    stepsTaken++;
     const newUrl = details.url;
     if (areArticlesTheSame(newUrl, endingArticleUrl)) {
         chrome.notifications.create({
@@ -122,9 +130,7 @@ chrome.webNavigation.onCommitted.addListener(async (details) => {
             title: "Congratulations!",
             message: `You have reached the target article: ${decodeURIComponent(newUrl.split("/").pop() || "")}. You win!`
         });
-        await resetGame();
-        return;
+        hasWon = true;
     }
-    stepsTaken++;
     await updateGameStorage();
 });
