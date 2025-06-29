@@ -17,20 +17,18 @@ class GameInProgressComponent extends LitElement {
     minSteps: number = 0;
 
     static styles = css`
-:host {
-    display: block;
-    padding: 16px;
-    background-color: var(--game-in-progress-bg, #f0f0f0);
+span {
+    font-weight: bold;
 }
-`;
+`
 
     render() {
         return html`
 <div>
-    <p>Game in progress...</p>
-    <p>You started at ${getTitleFromUrl(this.startArticleUrl)} and are trying to reach ${getTitleFromUrl(this.endArticleUrl)}.</p>
-    <p>You have taken ${this.stepsTaken} steps so far.</p>
-    <p>The best score for this pair is ${this.minSteps} steps.</p>
+    <p>Current Score: <span>${this.stepsTaken}</span></p>
+    <p>Minimum possible score for this pair: <span>${this.minSteps}</span></p>
+    <p>You started at <span>${getTitleFromUrl(this.startArticleUrl)}</span></p>
+    <p>You are trying to reach <span>${getTitleFromUrl(this.endArticleUrl)}</span></p>
     <give-up-game-button-component buttonText="Give Up"></give-up-game-button-component>
 </div>
 `

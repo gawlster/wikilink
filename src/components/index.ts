@@ -1,3 +1,5 @@
+import "./styled";
+
 import "./popupComponent";
 import "./hasWonComponent";
 import "./gameInProgressComponent";

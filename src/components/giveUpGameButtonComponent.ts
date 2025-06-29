@@ -26,6 +26,6 @@ class GiveUpGameButtonComponent extends LitElement {
         window.close();
     }
     render() {
-        return html`<button @click=${this.giveUp}>${this.buttonText}</button>`;
+        return html`<styled-button buttonType="danger" label=${this.buttonText} @click=${this.giveUp}></styled-button>`;
     }
 }
