@@ -52,6 +52,25 @@ async function updateGameStorage(): Promise<void> {
     })
 }
 
+async function getGameFromStorage(): Promise<void> {
+    const storedGame = await chrome.storage.local.get([
+        "gameInProgress",
+        "currentTabId",
+        "startingArticleUrl",
+        "endingArticleUrl",
+        "minSteps",
+        "stepsTaken",
+        "hasWon"
+    ]);
+    gameInProgress = storedGame.gameInProgress || false;
+    currentTabId = storedGame.currentTabId || -1;
+    startingArticleUrl = storedGame.startingArticleUrl || "";
+    endingArticleUrl = storedGame.endingArticleUrl || "";
+    minSteps = storedGame.minSteps || -1;
+    stepsTaken = storedGame.stepsTaken || 0;
+    hasWon = storedGame.hasWon || false;
+}
+
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (message.type === "OpenStartArticle") {
         const { gameData } = message;
@@ -65,13 +84,13 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         stepsTaken = -1; // Start at -1 to count the first step as 0
         gameInProgress = true;
         hasWon = false;
-        await updateGameStorage();
         chrome.tabs.create({ url: startingArticleUrl }, async (tab) => {
             if (chrome.runtime.lastError) {
                 console.error("Error opening tab:", chrome.runtime.lastError);
                 await resetGame();
             } else {
                 currentTabId = tab.id || -1;
+                await updateGameStorage();
                 chrome.notifications.create({
                     type: "list",
                     iconUrl: "../icon.png",
@@ -93,6 +112,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+    await getGameFromStorage();
     if (hasWon) {
         return;
     }
@@ -108,6 +128,7 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
 });
 
 chrome.webNavigation.onCommitted.addListener(async (details) => {
+    await getGameFromStorage();
     if (hasWon || details.tabId !== currentTabId) {
         return;
     }
