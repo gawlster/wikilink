@@ -15,7 +15,7 @@ class HasWonComponent extends LitElement {
     <h1>Congratulations!</h1>
     <p>You reached the target page in ${this.stepsTaken} steps.</p>
     <p>The best score for this pair is ${this.minSteps} steps.</p>
-    <button class="start-game-button">Play Again</button>
+    <start-game-button-component buttonText="Play Again"></start-game-button-component>
 </div>
 `;
     }

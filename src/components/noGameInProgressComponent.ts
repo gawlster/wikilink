@@ -7,7 +7,7 @@ class NoGameInProgressComponent extends LitElement {
         return html`
 <div>
     <p>No game in progress.</p>
-    <button class="start-game-button">Start Game</button>
+    <start-game-button-component buttonText="Start Game"></start-game-button-component>
 </div>
 `;
     }
