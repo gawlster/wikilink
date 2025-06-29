@@ -18,8 +18,9 @@ span {
     render() {
         return html`
 <div>
+    <h2>You won!</h2>
     <p>Your score: <span>${this.stepsTaken}</span></p>
-    <p>Minimum possible score for this pair: <span>${this.minSteps}</span></p>
+    <p>Minimum possible score: <span>${this.minSteps}</span></p>
     <start-game-button-component buttonText="Play Again"></start-game-button-component>
 </div>
 `;

@@ -1,5 +1,5 @@
 import { css, html, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 
 type ButtonType = "primary" | "danger";
 
@@ -13,6 +13,12 @@ class StyledButton extends LitElement {
 
     @property({ type: Boolean })
     disabled: boolean = false
+
+    @property({ attribute: false, type: Function })
+    onClick: ((e: MouseEvent) => void | Promise<void>) | null = null
+
+    @state()
+    loading: boolean = false
 
     static styles = css`
 button {
@@ -41,6 +47,10 @@ button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
+button[loading] {
+    filter: brightness(0.8);
+    cursor: wait;
+}
 `
 
     render() {
@@ -49,6 +59,7 @@ button:disabled {
     ?disabled=${this.disabled}
     @click=${(e: MouseEvent) => this._onClick(e)}
     buttonType=${this.buttonType}
+    ?loading=${this.loading}
 >
     ${this.label}
 </button>
@@ -56,11 +67,19 @@ button:disabled {
     }
 
     private _onClick(e: MouseEvent) {
-        if (this.disabled) {
+        if (this.disabled || this.loading) {
             e.preventDefault();
             e.stopPropagation();
             return;
         }
-        this.dispatchEvent(new MouseEvent("click", e));
+        this.loading = true;
+        if (this.onClick) {
+            const result = this.onClick(e);
+            if (result instanceof Promise) {
+                result.finally(() => this.loading = false);
+            } else {
+                this.loading = false;
+            }
+        }
     }
 }

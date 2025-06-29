@@ -28,6 +28,12 @@ class StartGameButtonComponent extends LitElement {
         })
     }
     render() {
-        return html`<styled-button buttonType="primary" label=${this.buttonText} @click=${this.startGame}></styled-button>`;
+        return html`
+<styled-button
+    buttonType="primary"
+    label=${this.buttonText}
+    .onClick=${this.startGame}
+>
+</styled-button>`;
     }
 }
