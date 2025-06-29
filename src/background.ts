@@ -72,42 +72,54 @@ async function getGameFromStorage(): Promise<void> {
 }
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-    if (message.type === "OpenStartArticle") {
-        const { gameData } = message;
-        if (!isValidStartGameMessageData(gameData)) {
-            console.error("Invalid message format for starting a game.");
-            return;
-        }
-        startingArticleUrl = gameData.startingArticleUrl;
-        endingArticleUrl = gameData.endingArticleUrl;
-        minSteps = gameData.minSteps;
-        stepsTaken = -1; // Start at -1 to count the first step as 0
-        gameInProgress = true;
-        hasWon = false;
-        chrome.tabs.create({ url: startingArticleUrl }, async (tab) => {
-            if (chrome.runtime.lastError) {
-                console.error("Error opening tab:", chrome.runtime.lastError);
-                await resetGame();
-            } else {
-                currentTabId = tab.id || -1;
-                await updateGameStorage();
-                chrome.notifications.create({
-                    type: "list",
-                    iconUrl: "../icon.png",
-                    title: "Game Started",
-                    message: "You have started a new game! Here are the rules:",
-                    items: [
-                        { title: "1", message: "Navigate by clicking links only." },
-                        { title: "2", message: "Reach the target article in the least steps." },
-                        { title: "3", message: "You may open another tab for information." },
-                        { title: "4", message: "Once you reach the target article, you win!" },
-                        { title: "5", message: "Closing the game tab ends the game." }
-                    ]
-                });
+    switch (message.type) {
+        case "StartGame":
+            const { gameData } = message;
+            if (!isValidStartGameMessageData(gameData)) {
+                console.error("Invalid message format for starting a game.");
+                return;
             }
-        });
-    } else {
-        console.error("No URL provided in message.");
+            startingArticleUrl = gameData.startingArticleUrl;
+            endingArticleUrl = gameData.endingArticleUrl;
+            minSteps = gameData.minSteps;
+            stepsTaken = -1; // Start at -1 to count the first step as 0
+            gameInProgress = true;
+            hasWon = false;
+            chrome.tabs.create({ url: startingArticleUrl }, async (tab) => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error opening tab:", chrome.runtime.lastError);
+                    await resetGame();
+                } else {
+                    currentTabId = tab.id || -1;
+                    await updateGameStorage();
+                    chrome.notifications.create({
+                        type: "list",
+                        iconUrl: "../icon.png",
+                        title: "Game Started",
+                        message: "You have started a new game! Here are the rules:",
+                        items: [
+                            { title: "1", message: "Navigate by clicking links only." },
+                            { title: "2", message: "Reach the target article in the least steps." },
+                            { title: "3", message: "You may open another tab for information." },
+                            { title: "4", message: "Once you reach the target article, you win!" },
+                            { title: "5", message: "Closing the game tab ends the game." }
+                        ]
+                    });
+                }
+            });
+            break;
+        case "GiveUpGame":
+            await resetGame();
+            chrome.notifications.create({
+                type: "basic",
+                iconUrl: "../icon.png",
+                title: "Game Over",
+                message: "You have given up the game. You may start a new game from the extension popup."
+            });
+            break;
+        default:
+            console.warn("Unknown message type:", message.type);
+            break;
     }
 });
 

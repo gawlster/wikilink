@@ -1,11 +1,10 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { getRandomStartAndEnd } from "../gameInitialization";
 
-@customElement("start-game-button-component")
-class StartGameButtonComponent extends LitElement {
+@customElement("give-up-game-button-component")
+class GiveUpGameButtonComponent extends LitElement {
     @property({ type: String })
-    buttonText = "Start Game";
+    buttonText = "Give Up";
 
     static styles = css`
         button {
@@ -20,14 +19,13 @@ class StartGameButtonComponent extends LitElement {
             background-color: #45a049;
         }
     `;
-    async startGame() {
-        const gameData = await getRandomStartAndEnd();
+    async giveUp() {
         await chrome.runtime.sendMessage({
-            type: "StartGame",
-            gameData
+            type: "GiveUpGame",
         })
+        window.close();
     }
     render() {
-        return html`<button @click=${this.startGame}>${this.buttonText}</button>`;
+        return html`<button @click=${this.giveUp}>${this.buttonText}</button>`;
     }
 }

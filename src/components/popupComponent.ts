@@ -47,10 +47,12 @@ class PopupComponent extends LitElement {
     display: block;
     padding: 16px;
     background-color: var(--popup-component-bg, #f0f0f0);
+    aspect-ratio: 2 / 3;
+    width: 200px;
 }
 `;
 
-    render() {
+    private getMainComponent() {
         if (this.state === null) {
             return html`<p>Loading...</p>`;
         }
@@ -66,5 +68,12 @@ class PopupComponent extends LitElement {
         } else {
             return html`<no-game-in-progress-component></no-game-in-progress-component>`;
         }
+    }
+
+    render() {
+        return html`
+<h1>WikiLink</h1>
+${this.getMainComponent()}
+`
     }
 }

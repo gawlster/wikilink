@@ -3,3 +3,4 @@ import "./hasWonComponent";
 import "./gameInProgressComponent";
 import "./noGameInProgressComponent";
 import "./startGameButtonComponent";
+import "./giveUpGameButtonComponent";

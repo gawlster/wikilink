@@ -31,6 +31,7 @@ class GameInProgressComponent extends LitElement {
     <p>You started at ${getTitleFromUrl(this.startArticleUrl)} and are trying to reach ${getTitleFromUrl(this.endArticleUrl)}.</p>
     <p>You have taken ${this.stepsTaken} steps so far.</p>
     <p>The best score for this pair is ${this.minSteps} steps.</p>
+    <give-up-game-button-component buttonText="Give Up"></give-up-game-button-component>
 </div>
 `
     }
