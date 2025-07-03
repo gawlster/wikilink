@@ -112,7 +112,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
             await resetGame();
             chrome.notifications.create({
                 type: "basic",
-                iconUrl: "../icon.png",
+                iconUrl: "../icons/icon128.png",
                 title: "Game Over",
                 message: "You have given up the game. You may start a new game from the extension popup."
             });
@@ -131,7 +131,7 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
     if (tabId === currentTabId) {
         chrome.notifications.create({
             type: "basic",
-            iconUrl: "../icon.png",
+            iconUrl: "../icons/icon128.png",
             title: "Game Over",
             message: "You have closed the game tab. The game has ended. You may start a new game from the extension popup."
         })
@@ -147,7 +147,7 @@ chrome.webNavigation.onCommitted.addListener(async (details) => {
     if (details.transitionType !== "link") {
         chrome.notifications.create({
             type: "basic",
-            iconUrl: "../icon.png",
+            iconUrl: "../icons/icon128.png",
             title: "Invalid Navigation",
             message: "Game over! You may only navigate via links within the game tab. Please start a new game from the extension popup."
         });
@@ -159,7 +159,7 @@ chrome.webNavigation.onCommitted.addListener(async (details) => {
     if (areArticlesTheSame(newUrl, endingArticleUrl)) {
         chrome.notifications.create({
             type: "basic",
-            iconUrl: "../icon.png",
+            iconUrl: "../icons/icon128.png",
             title: "Congratulations!",
             message: `You have reached the target article: ${decodeURIComponent(newUrl.split("/").pop() || "")}. You win!`
         });
