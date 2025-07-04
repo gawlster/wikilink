@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "ESNext",
+        "strict": true,
+        "outDir": "dist",
+        "moduleResolution": "Node",
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "types": ["chrome"],
+        "experimentalDecorators": true
+    },
+    "include": ["src"]
+}
