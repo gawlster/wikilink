@@ -1,0 +1,27 @@
+{
+    "name": "wikilink-server",
+    "version": "1.0.0",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc",
+        "build:watch": "tsc --watch",
+        "start": "node dist/index.js",
+        "dev": "concurrently \"npm run build:watch\" \"nodemon ./dist/index.js\""
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "express": "^5.1.0"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.3",
+        "@types/node": "^24.0.10",
+        "concurrently": "^9.2.0",
+        "nodemon": "^3.1.10",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.3"
+    }
+}
