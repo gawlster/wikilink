@@ -1,7 +1,6 @@
 {
     "name": "wikilink-server",
     "version": "1.0.0",
-    "type": "module",
     "main": "index.js",
     "scripts": {
         "build": "tsc",
@@ -14,7 +13,8 @@
     "license": "ISC",
     "description": "",
     "dependencies": {
-        "express": "^5.1.0"
+        "express": "^5.1.0",
+        "uuid": "^11.1.0"
     },
     "devDependencies": {
         "@types/express": "^5.0.3",
