@@ -14,7 +14,7 @@ function getTitleFromUrl(url: string): string {
 /**
  * Get outgoing article URLs linked from a given Wikipedia page.
  */
-async function getOutgoingArticleUrls(articleUrl: string): Promise<string[]> {
+export async function getOutgoingArticleUrls(articleUrl: string): Promise<string[]> {
     const articleTitle = getTitleFromUrl(articleUrl);
 
     const apiUrl = `https://en.wikipedia.org/w/api.php` +
@@ -80,4 +80,25 @@ export async function getRandomStartAndEnd(): Promise<{ startingArticleUrl: stri
         endingArticleUrl,
         minSteps
     };
+}
+
+/**
+ * Extracts and normalizes a Wikipedia article title from a URL.
+ */
+function getNormalizedTitle(url: string): string {
+    const parts = url.split("/wiki/");
+    if (parts.length < 2) {
+        throw new Error(`Invalid Wikipedia URL: ${url}`);
+    }
+    // Decode and convert underscores to spaces
+    return decodeURIComponent(parts[1]).replace(/_/g, " ").trim();
+}
+
+/**
+ * Compares two Wikipedia article URLs to see if they point to the same article.
+ */
+export function areArticlesTheSame(urlA: string, urlB: string): boolean {
+    const titleA = getNormalizedTitle(urlA).toLowerCase();
+    const titleB = getNormalizedTitle(urlB).toLowerCase();
+    return titleA === titleB;
 }
