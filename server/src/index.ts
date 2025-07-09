@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express, { Request, Response } from 'express';
 import { createGame, deleteGame, getGameFromId, saveGame } from './game';
 import { areArticlesTheSame, getOutgoingArticleUrls } from './wikipediaUtils';
@@ -19,10 +22,15 @@ app.get("/startGame", async (req: Request, res: Response) => {
 
 app.post("/navigateLink", async (req: Request, res: Response) => {
     const { gameId, oldPageUrl, newPageUrl } = req.body;
-    const game = await getGameFromId(gameId);
     try {
         if (!gameId || !oldPageUrl || !newPageUrl) {
             res.status(400).json({ error: "Missing required parameters" });
+            return;
+        }
+
+        const game = await getGameFromId(gameId);
+        if (!areArticlesTheSame(game.currentArticleUrl, oldPageUrl)) {
+            res.status(400).json({ error: "Invalid game ID or current article URL" });
             return;
         }
 

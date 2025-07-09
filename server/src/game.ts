@@ -33,12 +33,21 @@ export async function createGame(): Promise<Game> {
 }
 
 export async function getGameFromId(gameId: string) {
-    const raw = await redis.get<string>(`game:${gameId}`);
-    const game = raw ? JSON.parse(raw) : null;
-    if (!game) {
-        throw new Error(`Game with ID ${gameId} not found`);
+    const raw = await redis.get(`game:${gameId}`);
+    if (typeof raw !== "object" || raw === null || !isValidGame(raw)) {
+        throw new Error(`Game with ID ${gameId} not found or malformed`);
     }
-    return game;
+    return raw as Game;
+}
+
+function isValidGame(game: any): game is Game {
+    return typeof game.id === 'string' &&
+        typeof game.startingArticleUrl === 'string' &&
+        typeof game.endingArticleUrl === 'string' &&
+        typeof game.currentArticleUrl === 'string' &&
+        typeof game.minSteps === 'number' &&
+        typeof game.stepsTaken === 'number' &&
+        typeof game.hasWon === 'boolean';
 }
 
 export async function saveGame(game: Game): Promise<void> {
