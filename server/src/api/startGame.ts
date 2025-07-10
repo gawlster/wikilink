@@ -1,7 +1,7 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { type Request, type Response } from "express";
 import { createGame } from "../game";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: Request, res: Response) {
     try {
         const game = await createGame();
         res.status(200).json(game);
