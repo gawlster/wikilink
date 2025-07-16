@@ -20,20 +20,63 @@ class GameInProgressComponent extends LitElement {
     gameId: string = "";
 
     static styles = css`
-span {
+:host {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    gap: 28px;
+}
+p {
+    margin: 0;
+    padding: 0;
+}
+.divider {
+    width: 100%;
+    height: 1px;
+    background-color: #223344;
+}
+.steps {
+    font-size: 1.2em;
+    color: #223344;
+    text-align: center;
     font-weight: bold;
+}
+.article-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+.label {
+    font-weight: normal;
+    font-size: 1.1em;
+    color: #223344;
+    text-align: center;
+}
+.value {
+    font-weight: bold;
+    font-size: 1.3em;
+    color: #223344;
+    text-align: center;
 }
 `
 
     render() {
         return html`
-<div>
-    <p>Current Score: <span>${this.stepsTaken}</span></p>
-    <p>Minimum possible score for this pair: <span>${this.minSteps}</span></p>
-    <p>You started at <span>${getTitleFromUrl(this.startArticleUrl)}</span></p>
-    <p>You are trying to reach <span>${getTitleFromUrl(this.endArticleUrl)}</span></p>
-    <give-up-game-button-component buttonText="Give Up" gameId=${this.gameId}></give-up-game-button-component>
+<p class="steps">Steps: ${this.stepsTaken} / ${this.minSteps}</p>
+<div class="divider"></div>
+<div class="article-info">
+    <p class="label">Start Article</p>
+    <p class="value">${this.startArticleUrl ? getTitleFromUrl(this.startArticleUrl) : "Loading..."}</p>
 </div>
+<div class="divider"></div>
+<div class="article-info">
+    <p class="label">Target Article</p>
+    <p class="value">${this.endArticleUrl ? getTitleFromUrl(this.endArticleUrl) : "Loading..."}</p>
+</div>
+<give-up-game-button-component buttonText="Give Up" gameId=${this.gameId}></give-up-game-button-component>
 `
     }
 }

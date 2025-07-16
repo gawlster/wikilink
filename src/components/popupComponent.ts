@@ -10,6 +10,11 @@ class PopupComponent extends LitElement {
     connectedCallback() {
         super.connectedCallback();
         this.fetchStateFromStorage();
+        chrome.storage.onChanged.addListener((changes, area) => {
+            if (area === 'local') {
+                this.fetchStateFromStorage();
+            }
+        });
     }
 
     async fetchStateFromStorage() {
@@ -19,11 +24,29 @@ class PopupComponent extends LitElement {
 
     static styles = css`
 :host {
-    display: block;
-    padding: 16px;
-    background-color: var(--popup-component-bg, #f0f0f0);
-    aspect-ratio: 2 / 3;
-    width: 200px;
+    background-color: #b5d0ec;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cg fill='%235e5e5e' fill-opacity='0.08'%3E%3Cpolygon fill-rule='evenodd' points='8 4 12 6 8 8 6 12 4 8 0 6 4 4 6 0 8 4'/%3E%3C/g%3E%3C/svg%3E");
+    display: flex;
+    flex-direction: column;
+    width: 350px;
+    height: 500px;
+    padding: 24px;
+    font-family: "Rubik", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+.inner {
+    height: 100%;
+    padding: 20px;
+    background-color: rgba(245, 243, 238, 0.4);
+    border-radius: 8px;
+    border: 1px solid #223344;
+}
+h1 {
+    text-align: center;
+    font-size: 1.5em;
+    color: #223344;
+    font-weight: bold;
 }
 `;
 
@@ -32,7 +55,12 @@ class PopupComponent extends LitElement {
             return html`<p>Loading...</p>`;
         }
         if (this.state.hasWon) {
-            return html`<has-won-component stepsTaken=${this.state.visitedUrls.length - 1} minSteps=${this.state.minSteps}></has-won-component>`;
+            return html`<has-won-component
+                startArticleUrl=${this.state.startingArticleUrl}
+                endArticleUrl=${this.state.endingArticleUrl}
+                stepsTaken=${this.state.visitedUrls.length - 1}
+                minSteps=${this.state.minSteps}
+            ></has-won-component>`;
         } else if (this.state.id) {
             return html`<game-in-progress-component
                 startArticleUrl=${this.state.startingArticleUrl}
@@ -49,8 +77,10 @@ class PopupComponent extends LitElement {
     render() {
         return html`
 <h1>WikiLink</h1>
-<p>Note: The interface of this extension is still in development. It may lag behind game state by a couple seconds. Closing and reopening the popup will trigger a refresh.</p>
-${this.getMainComponent()}
+<div class="inner">
+    ${this.getMainComponent()}
+</div>
 `
     }
 }
+

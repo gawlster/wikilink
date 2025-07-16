@@ -1,1 +1,2 @@
 import "./styledButton";
+import "./styledRangeInput";

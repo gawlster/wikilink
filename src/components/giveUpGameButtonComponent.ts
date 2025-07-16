@@ -25,7 +25,6 @@ class GiveUpGameButtonComponent extends LitElement {
     `;
     async giveUp() {
         await clearStorage();
-        window.close();
     }
     render() {
         return html`

@@ -17,38 +17,51 @@ class StyledButton extends LitElement {
     @property({ attribute: false, type: Function })
     onClick: ((e: MouseEvent) => void | Promise<void>) | null = null
 
+    @property({ type: Boolean, reflect: true, attribute: 'fullwidth' })
+    fullWidth: boolean = false
+
     @state()
     loading: boolean = false
 
     static styles = css`
+:host[fullWidth] {
+    width: 100%;
+}
 button {
     font-size: 1em;
+    font-weight: bold;
     padding: 0.5em 1em;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s ease;
+    width: 100%;
 }
 button[buttonType="primary"] {
-    background-color: #4CAF50;
+    background-color: #d4a639;
     color: white;
 }
 button[buttonType="primary"]:hover {
-    background-color: #45a049;
+    background-color: #b88f2f;
+}
+button[buttonType="primary"]:active {
+    background-color: #a87f25;
 }
 button[buttonType="danger"] {
-    background-color: #f44336;
+    background-color: #c1433f;
     color: white;
 }
 button[buttonType="danger"]:hover {
-    background-color: #d32f2f;
+    background-color: #a63632;
+}
+button[buttonType="danger"]:active {
+    background-color: #8f2e2a;
 }
 button:disabled {
-    background-color: #ccc;
+    background-color: #dcdcdc;
     cursor: not-allowed;
 }
 button[loading] {
-    filter: brightness(0.8);
     cursor: wait;
 }
 `
