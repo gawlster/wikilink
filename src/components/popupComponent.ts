@@ -1,13 +1,11 @@
 import { css, html, LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { Game, gameKeys } from "../communication";
-
-type PopupState = Game | null;
+import { getStorage, Storage, storageKeys } from "../storage";
 
 @customElement("popup-component")
 class PopupComponent extends LitElement {
     @state()
-    private state: PopupState = null;
+    private state: Storage | null = null;
 
     connectedCallback() {
         super.connectedCallback();
@@ -15,8 +13,8 @@ class PopupComponent extends LitElement {
     }
 
     async fetchStateFromStorage() {
-        const storedState = await chrome.storage.local.get(gameKeys);
-        this.state = storedState as Game;
+        const storedState = await getStorage();
+        this.state = storedState;
     }
 
     static styles = css`
@@ -34,12 +32,12 @@ class PopupComponent extends LitElement {
             return html`<p>Loading...</p>`;
         }
         if (this.state.hasWon) {
-            return html`<has-won-component stepsTaken=${this.state.stepsTaken} minSteps=${this.state.minSteps}></has-won-component>`;
+            return html`<has-won-component stepsTaken=${this.state.visitedUrls.length - 1} minSteps=${this.state.minSteps}></has-won-component>`;
         } else if (this.state.id) {
             return html`<game-in-progress-component
                 startArticleUrl=${this.state.startingArticleUrl}
                 endArticleUrl=${this.state.endingArticleUrl}
-                stepsTaken=${this.state.stepsTaken}
+                stepsTaken=${this.state.visitedUrls.length - 1}
                 minSteps=${this.state.minSteps}
                 gameId=${this.state.id}
             ></game-in-progress-component>`;

@@ -1,6 +1,6 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { deleteGame } from "../communication";
+import { clearStorage } from "../storage";
 
 @customElement("give-up-game-button-component")
 class GiveUpGameButtonComponent extends LitElement {
@@ -24,10 +24,7 @@ class GiveUpGameButtonComponent extends LitElement {
         }
     `;
     async giveUp() {
-        await deleteGame({ gameId: this.gameId });
-        await chrome.runtime.sendMessage({
-            type: "GiveUpGame",
-        })
+        await clearStorage();
         window.close();
     }
     render() {

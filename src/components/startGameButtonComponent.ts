@@ -1,6 +1,6 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { startNewGame } from "../communication.js";
+import { startNewGame } from "../communication";
 
 @customElement("start-game-button-component")
 class StartGameButtonComponent extends LitElement {
@@ -21,10 +21,10 @@ class StartGameButtonComponent extends LitElement {
         }
     `;
     async startGame() {
-        const gameData = await startNewGame();
+        const activeGame = await startNewGame();
         await chrome.runtime.sendMessage({
-            type: "StartGame",
-            gameData
+            type: "gameStarted",
+            game: activeGame
         })
     }
     render() {

@@ -1,74 +1,47 @@
-import { deleteGame, Game, gameKeys, navigteLink } from "./communication";
+import { validateWin } from "./communication";
+import { isValidActiveGame } from "./serverTypes";
+import { clearStorage, getStorage, Storage, updateStorage } from "./storage";
+import { areArticlesTheSame } from "./utils";
 
-let game: Game = {
+let currentStorage: Storage = {
     id: "",
     startingArticleUrl: "",
     endingArticleUrl: "",
-    currentArticleUrl: "",
     minSteps: -1,
-    stepsTaken: 0,
-    hasWon: false
-}
-let currentTabId: number = -1;
-
-function isValidGame(gameData: any): gameData is Game {
-    return gameData && typeof gameData.id === "string" &&
-        typeof gameData.startingArticleUrl === "string" &&
-        typeof gameData.endingArticleUrl === "string" &&
-        typeof gameData.currentArticleUrl === "string" &&
-        typeof gameData.minSteps === "number" &&
-        typeof gameData.stepsTaken === "number" &&
-        typeof gameData.hasWon === "boolean";
+    visitedUrls: [],
+    hasWon: false,
+    tabId: -1
 }
 
-async function resetGame(): Promise<void> {
-    await deleteGame({ gameId: game.id });
-    game = {
-        id: "",
-        startingArticleUrl: "",
-        endingArticleUrl: "",
-        currentArticleUrl: "",
-        minSteps: -1,
-        stepsTaken: 0,
-        hasWon: false
-    };
-    currentTabId = -1;
-    await updateGameStorage();
-}
-
-async function updateGameStorage(): Promise<void> {
-    await chrome.storage.local.set({
-        ...game,
-        currentTabId
-    });
-}
-
-async function getGameFromStorage(): Promise<void> {
-    const storedGame = await chrome.storage.local.get(gameKeys);
-    if (isValidGame(storedGame)) {
-        game = storedGame;
-    } else {
-        console.error("Invalid game data in storage:", storedGame);
-        await resetGame();
-    }
+async function refetchAndSetStorage(): Promise<Storage> {
+    const storage = await getStorage();
+    currentStorage = storage;
+    return currentStorage;
 }
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+    await refetchAndSetStorage();
     switch (message.type) {
-        case "StartGame":
-            const { gameData } = message;
-            if (!isValidGame(gameData)) {
+        case "gameStarted":
+            const { game } = message;
+            if (!isValidActiveGame(game)) {
                 console.error("Invalid message format for starting a game.");
                 return;
             }
-            game = gameData;
             chrome.tabs.create({ url: game.startingArticleUrl }, async (tab) => {
                 if (chrome.runtime.lastError) {
                     console.error("Error opening tab:", chrome.runtime.lastError);
-                    await resetGame();
+                    await clearStorage();
                 } else {
-                    currentTabId = tab.id || -1;
-                    await updateGameStorage();
+                    currentStorage = await updateStorage({
+                        id: game.id,
+                        startingArticleUrl: game.startingArticleUrl,
+                        endingArticleUrl: game.endingArticleUrl,
+                        minSteps: game.minSteps,
+                        visitedUrls: [game.startingArticleUrl],
+                        hasWon: false,
+                        tabId: tab.id || -1
+                    });
                     chrome.notifications.create({
                         type: "list",
                         iconUrl: "../icons/icon128.png",
@@ -85,15 +58,6 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
                 }
             });
             break;
-        case "GiveUpGame":
-            await resetGame();
-            chrome.notifications.create({
-                type: "basic",
-                iconUrl: "../icons/icon128.png",
-                title: "Game Over",
-                message: "You have given up the game. You may start a new game from the extension popup."
-            });
-            break;
         default:
             console.warn("Unknown message type:", message.type);
             break;
@@ -101,55 +65,44 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
-    await getGameFromStorage();
-    if (game.hasWon) {
-        return;
-    }
-    if (tabId === currentTabId) {
+    await refetchAndSetStorage();
+    if (tabId === currentStorage.tabId) {
         chrome.notifications.create({
             type: "basic",
             iconUrl: "../icons/icon128.png",
             title: "Game Over",
             message: "You have closed the game tab. The game has ended. You may start a new game from the extension popup."
         })
-        await resetGame();
+        await clearStorage();
     }
 });
 
 chrome.webNavigation.onCommitted.addListener(async (details) => {
-    await getGameFromStorage();
-    if (game.hasWon || details.tabId !== currentTabId) {
+    await refetchAndSetStorage();
+    if (currentStorage.hasWon) {
         return;
     }
-    if (details.transitionType !== "link") {
-        await resetGame();
-        chrome.notifications.create({
-            type: "basic",
-            iconUrl: "../icons/icon128.png",
-            title: "Invalid Navigation",
-            message: "Game over! You may only navigate via links within the game tab. Please start a new game from the extension popup."
-        });
-        return;
+    if (details.tabId !== currentStorage.tabId) {
+        return; // Ignore navigation events from other tabs
     }
     const newUrl = details.url;
-    const newGameData = await navigteLink({
-        gameId: game.id,
-        oldPageUrl: game.currentArticleUrl,
-        newPageUrl: newUrl
-    })
-    if (!isValidGame(newGameData)) {
-        console.error("Invalid game data received from server:", newGameData);
-        await resetGame();
-        return;
+    if (currentStorage.visitedUrls[currentStorage.visitedUrls.length - 1] === newUrl) {
+        return; // Ignore if the URL is the same as the last visited URL
     }
-    game = newGameData;
-    await updateGameStorage();
-    if (game.hasWon) {
-        chrome.notifications.create({
-            type: "basic",
-            iconUrl: "../icons/icon128.png",
-            title: "Congratulations!",
-            message: `You have reached the target article: ${decodeURIComponent(newUrl.split("/").pop() || "")}. You win!`
-        });
+    currentStorage = await updateStorage({
+        visitedUrls: [...currentStorage.visitedUrls, newUrl]
+    })
+    if (areArticlesTheSame(newUrl, currentStorage.endingArticleUrl)) {
+        try {
+            await validateWin(currentStorage.id, currentStorage.visitedUrls);
+        } catch (error) {
+            chrome.notifications.create({
+                type: "basic",
+                iconUrl: "../icons/icon128.png",
+                title: "Error",
+                message: "Your game was not validated successfully. Your score will be discarded. Please ensure you read and follow all the rules of the game."
+            });
+            return;
+        }
     }
 });
