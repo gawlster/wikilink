@@ -16,6 +16,9 @@ class GameInProgressComponent extends LitElement {
     @property({ type: Number })
     minSteps: number = 0;
 
+    @property({ type: String })
+    gameId: string = "";
+
     static styles = css`
 span {
     font-weight: bold;
@@ -29,7 +32,7 @@ span {
     <p>Minimum possible score for this pair: <span>${this.minSteps}</span></p>
     <p>You started at <span>${getTitleFromUrl(this.startArticleUrl)}</span></p>
     <p>You are trying to reach <span>${getTitleFromUrl(this.endArticleUrl)}</span></p>
-    <give-up-game-button-component buttonText="Give Up"></give-up-game-button-component>
+    <give-up-game-button-component buttonText="Give Up" gameId=${this.gameId}></give-up-game-button-component>
 </div>
 `
     }

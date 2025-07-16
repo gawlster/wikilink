@@ -1,6 +1,6 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { getRandomStartAndEnd } from "../gameInitialization";
+import { startNewGame } from "../communication.js";
 
 @customElement("start-game-button-component")
 class StartGameButtonComponent extends LitElement {
@@ -21,7 +21,7 @@ class StartGameButtonComponent extends LitElement {
         }
     `;
     async startGame() {
-        const gameData = await getRandomStartAndEnd();
+        const gameData = await startNewGame();
         await chrome.runtime.sendMessage({
             type: "StartGame",
             gameData

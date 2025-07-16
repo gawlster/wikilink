@@ -61,7 +61,7 @@ button[loading] {
     buttonType=${this.buttonType}
     ?loading=${this.loading}
 >
-    ${this.label}
+    ${this.loading ? "Loading..." : this.label}
 </button>
 `
     }

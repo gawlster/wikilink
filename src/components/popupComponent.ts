@@ -1,15 +1,8 @@
 import { css, html, LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { Game, gameKeys } from "../communication";
 
-type PopupState = {
-    gameInProgress: boolean;
-    currentTabId?: number;
-    startingArticleUrl: string;
-    endingArticleUrl: string;
-    minSteps: number;
-    stepsTaken: number;
-    hasWon: boolean;
-} | null;
+type PopupState = Game | null;
 
 @customElement("popup-component")
 class PopupComponent extends LitElement {
@@ -22,24 +15,8 @@ class PopupComponent extends LitElement {
     }
 
     async fetchStateFromStorage() {
-        const storedState = await chrome.storage.local.get([
-            "gameInProgress",
-            "currentTabId",
-            "startingArticleUrl",
-            "endingArticleUrl",
-            "minSteps",
-            "stepsTaken",
-            "hasWon"
-        ]);
-        this.state = {
-            gameInProgress: storedState.gameInProgress || false,
-            currentTabId: storedState.currentTabId,
-            startingArticleUrl: storedState.startingArticleUrl || "",
-            endingArticleUrl: storedState.endingArticleUrl || "",
-            minSteps: storedState.minSteps || 0,
-            stepsTaken: storedState.stepsTaken || 0,
-            hasWon: storedState.hasWon || false
-        };
+        const storedState = await chrome.storage.local.get(gameKeys);
+        this.state = storedState as Game;
     }
 
     static styles = css`
@@ -58,12 +35,13 @@ class PopupComponent extends LitElement {
         }
         if (this.state.hasWon) {
             return html`<has-won-component stepsTaken=${this.state.stepsTaken} minSteps=${this.state.minSteps}></has-won-component>`;
-        } else if (this.state.gameInProgress) {
+        } else if (this.state.id) {
             return html`<game-in-progress-component
                 startArticleUrl=${this.state.startingArticleUrl}
                 endArticleUrl=${this.state.endingArticleUrl}
                 stepsTaken=${this.state.stepsTaken}
                 minSteps=${this.state.minSteps}
+                gameId=${this.state.id}
             ></game-in-progress-component>`;
         } else {
             return html`<no-game-in-progress-component></no-game-in-progress-component>`;
@@ -73,6 +51,7 @@ class PopupComponent extends LitElement {
     render() {
         return html`
 <h1>WikiLink</h1>
+<p>Note: The interface of this extension is still in development. It may lag behind game state by a couple seconds. Closing and reopening the popup will trigger a refresh.</p>
 ${this.getMainComponent()}
 `
     }

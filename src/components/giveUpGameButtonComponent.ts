@@ -1,10 +1,14 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { deleteGame } from "../communication";
 
 @customElement("give-up-game-button-component")
 class GiveUpGameButtonComponent extends LitElement {
     @property({ type: String })
     buttonText = "Give Up";
+
+    @property({ type: String })
+    gameId = "";
 
     static styles = css`
         button {
@@ -20,6 +24,7 @@ class GiveUpGameButtonComponent extends LitElement {
         }
     `;
     async giveUp() {
+        await deleteGame({ gameId: this.gameId });
         await chrome.runtime.sendMessage({
             type: "GiveUpGame",
         })
@@ -30,7 +35,7 @@ class GiveUpGameButtonComponent extends LitElement {
 <styled-button
     buttonType="danger"
     label=${this.buttonText}
-    .onClick=${this.giveUp}
+    .onClick=${async () => await this.giveUp()}
 >
 </styled-button>`;
     }
