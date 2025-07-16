@@ -1,6 +1,6 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { getTitleFromUrl } from "../utils";
+import { getNormalizedTitle } from "../utils";
 
 @customElement("game-in-progress-component")
 class GameInProgressComponent extends LitElement {
@@ -69,12 +69,12 @@ p {
 <div class="divider"></div>
 <div class="article-info">
     <p class="label">Start Article</p>
-    <p class="value">${this.startArticleUrl ? getTitleFromUrl(this.startArticleUrl) : "Loading..."}</p>
+    <p class="value">${this.startArticleUrl ? getNormalizedTitle(this.startArticleUrl) : "Loading..."}</p>
 </div>
 <div class="divider"></div>
 <div class="article-info">
     <p class="label">Target Article</p>
-    <p class="value">${this.endArticleUrl ? getTitleFromUrl(this.endArticleUrl) : "Loading..."}</p>
+    <p class="value">${this.endArticleUrl ? getNormalizedTitle(this.endArticleUrl) : "Loading..."}</p>
 </div>
 <give-up-game-button-component buttonText="Give Up" gameId=${this.gameId}></give-up-game-button-component>
 `

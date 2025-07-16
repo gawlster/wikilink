@@ -1,7 +1,7 @@
 /**
  * Extracts and normalizes a Wikipedia article title from a URL.
  */
-function getNormalizedTitle(url: string): string {
+export function getNormalizedTitle(url: string): string {
     const parts = url.split("/wiki/");
     if (parts.length < 2) {
         throw new Error(`Invalid Wikipedia URL: ${url}`);
@@ -17,12 +17,4 @@ export function areArticlesTheSame(urlA: string, urlB: string): boolean {
     const titleA = getNormalizedTitle(urlA).toLowerCase();
     const titleB = getNormalizedTitle(urlB).toLowerCase();
     return titleA === titleB;
-}
-
-/**
- * Extract the article title from a full Wikipedia URL.
- */
-export function getTitleFromUrl(url: string): string {
-    const parts = url.split("/wiki/");
-    return decodeURIComponent(parts[1] || "");
 }

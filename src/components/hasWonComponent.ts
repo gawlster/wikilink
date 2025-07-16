@@ -1,7 +1,7 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { getTitleFromUrl } from "../utils";
 import { clearStorage } from "../storage";
+import { getNormalizedTitle } from "../utils";
 
 @customElement("has-won-component")
 class HasWonComponent extends LitElement {
@@ -59,12 +59,12 @@ class HasWonComponent extends LitElement {
 <div class="stats">
     <div class="stat">
         <p class="label">Start:</p>
-        <p class="value">${getTitleFromUrl(this.startArticleUrl)}</p>
+        <p class="value">${getNormalizedTitle(this.startArticleUrl)}</p>
     </div>
     <div class="divider"></div>
     <div class="stat">
         <p class="label">End:</p>
-        <p class="value">${getTitleFromUrl(this.endArticleUrl)}</p>
+        <p class="value">${getNormalizedTitle(this.endArticleUrl)}</p>
     </div>
     <div class="divider"></div>
     <div class="stat">
