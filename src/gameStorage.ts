@@ -7,6 +7,7 @@ export type GameStorage = {
     hasWon: boolean;
     tabId: number;
     createdFromSeed?: string;
+    newlyCreatedSeed?: string;
 }
 export const gameStorageKeys = [
     "id",
@@ -16,7 +17,8 @@ export const gameStorageKeys = [
     "visitedUrls",
     "hasWon",
     "tabId",
-    "createdFromSeed"
+    "createdFromSeed",
+    "newlyCreatedSeed"
 ] as const;
 
 export async function updateGameStorage(newStorage: Partial<GameStorage>): Promise<GameStorage> {
@@ -39,7 +41,8 @@ export async function getGameStorage(): Promise<GameStorage> {
         visitedUrls: [],
         hasWon: false,
         tabId: -1,
-        createdFromSeed: ""
+        createdFromSeed: "",
+        newlyCreatedSeed: ""
     }
     const storedData = await chrome.storage.local.get(gameStorageKeys);
     return {
@@ -57,7 +60,8 @@ export async function clearGameStorage(): Promise<void> {
         visitedUrls: [],
         hasWon: false,
         tabId: -1,
-        createdFromSeed: ""
+        createdFromSeed: "",
+        newlyCreatedSeed: ""
     }
     await chrome.storage.local.set(baseStorage);
 }

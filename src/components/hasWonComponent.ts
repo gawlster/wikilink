@@ -23,6 +23,9 @@ class HasWonComponent extends LitElement {
     @property({ type: String })
     createdFromSeed: string | undefined = undefined;
 
+    @property({ type: String })
+    newlyCreatedSeed: string | undefined = undefined;
+
     static styles = css`
 :host {
     display: flex;
@@ -87,6 +90,7 @@ class HasWonComponent extends LitElement {
 <create-random-seed-button-component
     gameId=${this.gameId}
     createdFromSeed=${this.createdFromSeed}
+    newlyCreatedSeed=${this.newlyCreatedSeed}
 ></create-random-seed-button-component>
 <styled-button
     buttonType="primary"

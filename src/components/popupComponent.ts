@@ -70,6 +70,7 @@ h1 {
                 minSteps=${this.state.minSteps}
                 gameId=${this.state.id}
                 createdFromSeed=${this.state.createdFromSeed}
+                newlyCreatedSeed=${this.state.newlyCreatedSeed}
             ></has-won-component>`;
         } else if (this.state.id) {
             return html`<game-in-progress-component

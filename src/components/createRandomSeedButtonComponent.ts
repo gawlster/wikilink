@@ -1,11 +1,11 @@
 import { css, html, LitElement } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 import { createSeedFromCompletedGame } from "../communication";
 
 @customElement("create-random-seed-button-component")
 class CreateRandomSeedButtonComponent extends LitElement {
-    @state()
-    seedId = "";
+    @property({ type: String })
+    newlyCreatedSeed: string | undefined = undefined;
     @property({ type: String })
     gameId = "";
     @property({ type: String })
@@ -21,10 +21,10 @@ class CreateRandomSeedButtonComponent extends LitElement {
 <p>${this.createdFromSeed}</p>
 `
         }
-        if (this.seedId) {
+        if (this.newlyCreatedSeed) {
             return html`
 <p>Seed created successfully! Use the following ID to play again or share with friends:</p>
-<p>${this.seedId}</p>
+<p>${this.newlyCreatedSeed}</p>
 `
         }
         return html`
@@ -39,8 +39,7 @@ class CreateRandomSeedButtonComponent extends LitElement {
 
     private async handleSubmit() {
         try {
-            const seed = await createSeedFromCompletedGame(this.gameId);
-            this.seedId = seed.id;
+            await createSeedFromCompletedGame(this.gameId);
         } catch (error) {
             console.error("Seed creation from completed game failed:", error);
             // Handle login failure (e.g., show an error message)

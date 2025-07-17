@@ -196,6 +196,7 @@ export async function createSeedFromCompletedGame(gameId: string) {
         if (!seed || !seed.id) {
             throw new Error("Invalid seed response from server.");
         }
+        await updateGameStorage({ newlyCreatedSeed: seed.id });
         return seed;
     } catch (error) {
         console.error("Error creating seed from completed game:", error);
