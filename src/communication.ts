@@ -16,6 +16,12 @@ async function getHeadersWithAuth(headers: object = {}) {
     }
 }
 
+async function storeAuthTokens(response: Response) {
+    const accessToken = response.headers.get("Authorization")?.split(" ")[1] || "";
+    const refreshToken = response.headers.get("x-refresh-token") || "";
+    await updateAuthStorage({ accessToken, refreshToken });
+}
+
 export async function startNewGame() {
     try {
         const response = await fetch(`${getAPIRootUrl()}/active/start`, {
@@ -24,6 +30,7 @@ export async function startNewGame() {
                 "Content-Type": "application/json"
             })
         });
+        await storeAuthTokens(response);
         if (!response.ok) {
             throw new Error(`Failed to start new game: ${response.statusText}`);
         }
@@ -51,6 +58,7 @@ export async function startNewGameFromSeed(seedId: string) {
             }),
             body: JSON.stringify({ seedId })
         });
+        await storeAuthTokens(response);
         if (!response.ok) {
             throw new Error(`Failed to start new game from seed: ${response.statusText}`);
         }
@@ -78,6 +86,7 @@ export async function validateWin(id: string, visitedUrls: string[]) {
             }),
             body: JSON.stringify({ id, visitedUrls })
         });
+        await storeAuthTokens(response);
         if (!response.ok) {
             throw new Error(`Failed to validate win: ${response.statusText}`);
         }
@@ -100,12 +109,10 @@ export async function login(email: string, password: string) {
             }),
             body: JSON.stringify({ email, password })
         });
+        await storeAuthTokens(response);
         if (!response.ok) {
             throw new Error(`Login failed: ${response.statusText}`);
         }
-        const accessToken = response.headers.get("Authorization")?.split(" ")[1] || "";
-        const refreshToken = response.headers.get("x-refresh-token") || "";
-        await updateAuthStorage({ accessToken, refreshToken });
     } catch (error) {
         console.error("Error during login:", error);
         if (error instanceof Error && error.message.includes("Unauthorized")) {
@@ -127,12 +134,10 @@ export async function register(email: string, password: string, confirmPassword:
             }),
             body: JSON.stringify({ email, password, confirmPassword })
         });
+        await storeAuthTokens(response);
         if (!response.ok) {
             throw new Error(`Registration failed: ${response.statusText}`);
         }
-        const accessToken = response.headers.get("Authorization")?.split(" ")[1] || "";
-        const refreshToken = response.headers.get("x-refresh-token") || "";
-        await updateAuthStorage({ accessToken, refreshToken });
     } catch (error) {
         console.error("Error during registration:", error);
         if (error instanceof Error && error.message.includes("Unauthorized")) {
@@ -156,6 +161,7 @@ export async function createSeed(startingArticleUrl: string, endingArticleUrl: s
                 category
             })
         });
+        await storeAuthTokens(response);
         if (!response.ok) {
             throw new Error(`Failed to create seed: ${response.statusText}`);
         }
@@ -182,6 +188,7 @@ export async function createSeedFromCompletedGame(gameId: string) {
             }),
             body: JSON.stringify({ gameId })
         });
+        await storeAuthTokens(response);
         if (!response.ok) {
             throw new Error(`Failed to create seed from completed game: ${response.statusText}`);
         }

@@ -14,25 +14,20 @@ class NoGameInProgressComponent extends LitElement {
 :host {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
+    gap: 16px;
 }
 .input-pair {
     display: flex;
     flex-direction: column;
     margin-bottom: 1em;
-    gap: 16px;
-}
-.content {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
+    gap: 8px;
 }
 `
     render() {
         return html`
 <div class="rules">
     <h3>Rules</h3>
+    <p>Note that this extension is still under development. Bugs may occur.</p>
     <p>Navigate by clicking links only.</p>
     <p>Reach the target article in the least steps.</p>
     <p>You may open another tab for information.</p>
@@ -41,24 +36,22 @@ class NoGameInProgressComponent extends LitElement {
     <p>Games will expire after 1 hour of inactivity.</p>
     <p>Good luck!</p>
 </div>
-<div class="content">
-    <div class="input-pair">
-        <label for="seed">Play a seeded game:</label>
-        <input
-            type="text"
-            id="seed"
-            name="seed"
-            required
-            .value=${this.seed}
-            @input=${this.onSeedInput}
-        >
-    </div>
-    <start-game-button-component
-        buttonText="Start Game"
-        fullWidth=${true}
-        .seed=${this.seed}
-    ></start-game-button-component>
+<div class="input-pair">
+    <label for="seed">Play a seeded game:</label>
+    <input
+        type="text"
+        id="seed"
+        name="seed"
+        required
+        .value=${this.seed}
+        @input=${this.onSeedInput}
+    >
 </div>
+<start-game-button-component
+    buttonText="Start Game"
+    fullWidth=${true}
+    .seed=${this.seed}
+></start-game-button-component>
 `;
     }
 }
