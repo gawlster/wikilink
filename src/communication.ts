@@ -35,6 +35,9 @@ export async function startNewGame() {
         return activeGame;
     } catch (error) {
         console.error("Error starting new game:", error);
+        if (error instanceof Error && error.message.includes("Unauthorized")) {
+            await updateAuthStorage({ accessToken: "", refreshToken: "" });
+        }
         throw error;
     }
 }
@@ -54,6 +57,9 @@ export async function validateWin(id: string, visitedUrls: string[]) {
         await updateGameStorage({ hasWon: true });
     } catch (error) {
         console.error("Error validating win:", error);
+        if (error instanceof Error && error.message.includes("Unauthorized")) {
+            await updateAuthStorage({ accessToken: "", refreshToken: "" });
+        }
         throw error;
     }
 }
@@ -75,6 +81,9 @@ export async function login(email: string, password: string) {
         await updateAuthStorage({ accessToken, refreshToken });
     } catch (error) {
         console.error("Error during login:", error);
+        if (error instanceof Error && error.message.includes("Unauthorized")) {
+            await updateAuthStorage({ accessToken: "", refreshToken: "" });
+        }
         throw error;
     }
 }
@@ -99,6 +108,9 @@ export async function register(email: string, password: string, confirmPassword:
         await updateAuthStorage({ accessToken, refreshToken });
     } catch (error) {
         console.error("Error during registration:", error);
+        if (error instanceof Error && error.message.includes("Unauthorized")) {
+            await updateAuthStorage({ accessToken: "", refreshToken: "" });
+        }
         throw error;
     }
 }

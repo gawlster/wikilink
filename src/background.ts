@@ -1,9 +1,10 @@
+import { AuthStorage, getAuthStorage } from "./authStorage";
 import { validateWin } from "./communication";
 import { clearGameStorage, GameStorage, getGameStorage, updateGameStorage } from "./gameStorage";
 import { isValidActiveGame } from "./serverTypes";
 import { areArticlesTheSame } from "./utils";
 
-let currentStorage: GameStorage = {
+let currentGameStorage: GameStorage = {
     id: "",
     startingArticleUrl: "",
     endingArticleUrl: "",
@@ -13,10 +14,16 @@ let currentStorage: GameStorage = {
     tabId: -1
 }
 
-async function refetchAndSetStorage(): Promise<GameStorage> {
-    const storage = await getGameStorage();
-    currentStorage = storage;
-    return currentStorage;
+let currentAuthStorage: AuthStorage = {
+    accessToken: "",
+    refreshToken: "",
+}
+
+async function refetchAndSetStorage(): Promise<void> {
+    const gameStorage = await getGameStorage();
+    const authStorage = await getAuthStorage();
+    currentGameStorage = gameStorage;
+    currentAuthStorage = authStorage;
 }
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -33,7 +40,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
                     console.error("Error opening tab:", chrome.runtime.lastError);
                     await clearGameStorage();
                 } else {
-                    currentStorage = await updateGameStorage({
+                    currentGameStorage = await updateGameStorage({
                         id: game.id,
                         startingArticleUrl: game.startingArticleUrl,
                         endingArticleUrl: game.endingArticleUrl,
@@ -66,35 +73,43 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
 chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
     await refetchAndSetStorage();
-    if (tabId === currentStorage.tabId) {
+    if (tabId === currentGameStorage.tabId) {
         chrome.notifications.create({
             type: "basic",
             iconUrl: "../icons/icon128.png",
             title: "Game Over",
             message: "You have closed the game tab. The game has ended. You may start a new game from the extension popup."
         })
+        let gameStorage = await getGameStorage();
+        let authStorage = await getAuthStorage();
+        console.log(gameStorage)
+        console.log(authStorage)
         await clearGameStorage();
+        gameStorage = await getGameStorage();
+        authStorage = await getAuthStorage();
+        console.log(gameStorage)
+        console.log(authStorage)
     }
 });
 
 chrome.webNavigation.onCommitted.addListener(async (details) => {
     await refetchAndSetStorage();
-    if (currentStorage.hasWon) {
+    if (currentGameStorage.hasWon) {
         return;
     }
-    if (details.tabId !== currentStorage.tabId) {
+    if (details.tabId !== currentGameStorage.tabId) {
         return; // Ignore navigation events from other tabs
     }
     const newUrl = details.url;
-    if (currentStorage.visitedUrls[currentStorage.visitedUrls.length - 1] === newUrl) {
+    if (currentGameStorage.visitedUrls[currentGameStorage.visitedUrls.length - 1] === newUrl) {
         return; // Ignore if the URL is the same as the last visited URL
     }
-    currentStorage = await updateGameStorage({
-        visitedUrls: [...currentStorage.visitedUrls, newUrl]
+    currentGameStorage = await updateGameStorage({
+        visitedUrls: [...currentGameStorage.visitedUrls, newUrl]
     })
-    if (areArticlesTheSame(newUrl, currentStorage.endingArticleUrl)) {
+    if (areArticlesTheSame(newUrl, currentGameStorage.endingArticleUrl)) {
         try {
-            await validateWin(currentStorage.id, currentStorage.visitedUrls);
+            await validateWin(currentGameStorage.id, currentGameStorage.visitedUrls);
         } catch (error) {
             chrome.notifications.create({
                 type: "basic",
