@@ -34,7 +34,8 @@ class PopupComponent extends LitElement {
     display: flex;
     flex-direction: column;
     width: 350px;
-    height: 500px;
+    min-height: 500px;
+    height: max(calc(100%-24px), 500px);
     padding: 24px;
     font-family: "Rubik", sans-serif;
     font-optical-sizing: auto;
@@ -67,6 +68,8 @@ h1 {
                 endArticleUrl=${this.state.endingArticleUrl}
                 stepsTaken=${this.state.visitedUrls.length - 1}
                 minSteps=${this.state.minSteps}
+                gameId=${this.state.id}
+                createdFromSeed=${this.state.createdFromSeed}
             ></has-won-component>`;
         } else if (this.state.id) {
             return html`<game-in-progress-component

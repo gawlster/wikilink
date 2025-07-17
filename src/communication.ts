@@ -172,3 +172,29 @@ export async function createSeed(startingArticleUrl: string, endingArticleUrl: s
         throw error;
     }
 }
+
+export async function createSeedFromCompletedGame(gameId: string) {
+    try {
+        const response = await fetch(`${getAPIRootUrl()}/seed/createFromCompletedGame`, {
+            method: "POST",
+            headers: await getHeadersWithAuth({
+                "Content-Type": "application/json"
+            }),
+            body: JSON.stringify({ gameId })
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to create seed from completed game: ${response.statusText}`);
+        }
+        const seed = await response.json();
+        if (!seed || !seed.id) {
+            throw new Error("Invalid seed response from server.");
+        }
+        return seed;
+    } catch (error) {
+        console.error("Error creating seed from completed game:", error);
+        if (error instanceof Error && error.message.includes("Unauthorized")) {
+            await updateAuthStorage({ accessToken: "", refreshToken: "" });
+        }
+        throw error;
+    }
+}

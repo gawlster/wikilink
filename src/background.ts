@@ -73,7 +73,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
 chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
     await refetchAndSetStorage();
-    if (tabId === currentGameStorage.tabId) {
+    if (!currentGameStorage.hasWon && tabId === currentGameStorage.tabId) {
         chrome.notifications.create({
             type: "basic",
             iconUrl: "../icons/icon128.png",

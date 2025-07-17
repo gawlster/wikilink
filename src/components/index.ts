@@ -8,3 +8,4 @@ import "./noGameInProgressComponent";
 import "./startGameButtonComponent";
 import "./giveUpGameButtonComponent";
 import "./createSeedFormComponent";
+import "./createRandomSeedButtonComponent";

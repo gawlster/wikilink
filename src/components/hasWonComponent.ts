@@ -17,6 +17,12 @@ class HasWonComponent extends LitElement {
     @property({ type: Number })
     minSteps: number = 0;
 
+    @property({ type: String })
+    gameId: string = "";
+
+    @property({ type: String })
+    createdFromSeed: string | undefined = undefined;
+
     static styles = css`
 :host {
     display: flex;
@@ -33,18 +39,19 @@ class HasWonComponent extends LitElement {
 .stat {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 .label {
     font-weight: normal;
     font-size: 1.1em;
     color: #223344;
-    text-align: center;
+    text-align: start;
 }
 .value {
     font-weight: bold;
     font-size: 1.1em;
     color: #223344;
-    text-align: center;
+    text-align: end;
 }
 .divider {
     width: 100%;
@@ -77,6 +84,10 @@ class HasWonComponent extends LitElement {
         <p class="value">${this.minSteps}</p>
     </div>
 </div>
+<create-random-seed-button-component
+    gameId=${this.gameId}
+    createdFromSeed=${this.createdFromSeed}
+></create-random-seed-button-component>
 <styled-button
     buttonType="primary"
     label="Back to Homepage"
