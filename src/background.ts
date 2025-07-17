@@ -82,25 +82,13 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
         })
         let gameStorage = await getGameStorage();
         let authStorage = await getAuthStorage();
-        console.log(gameStorage)
-        console.log(authStorage)
         await clearGameStorage();
         gameStorage = await getGameStorage();
         authStorage = await getAuthStorage();
-        console.log(gameStorage)
-        console.log(authStorage)
     }
 });
 
-chrome.webNavigation.onCommitted.addListener(async (details) => {
-    await refetchAndSetStorage();
-    if (currentGameStorage.hasWon) {
-        return;
-    }
-    if (details.tabId !== currentGameStorage.tabId) {
-        return; // Ignore navigation events from other tabs
-    }
-    const newUrl = details.url;
+async function handleNewUrl(newUrl: string) {
     if (currentGameStorage.visitedUrls[currentGameStorage.visitedUrls.length - 1] === newUrl) {
         return; // Ignore if the URL is the same as the last visited URL
     }
@@ -120,4 +108,28 @@ chrome.webNavigation.onCommitted.addListener(async (details) => {
             return;
         }
     }
+}
+
+chrome.webNavigation.onHistoryStateUpdated.addListener(async (details) => {
+    await refetchAndSetStorage();
+    if (currentGameStorage.hasWon) {
+        return;
+    }
+    if (details.tabId !== currentGameStorage.tabId) {
+        return; // Ignore navigation events from other tabs
+    }
+    const newUrl = details.url;
+    await handleNewUrl(newUrl);
+});
+
+chrome.webNavigation.onCommitted.addListener(async (details) => {
+    await refetchAndSetStorage();
+    if (currentGameStorage.hasWon) {
+        return;
+    }
+    if (details.tabId !== currentGameStorage.tabId) {
+        return; // Ignore navigation events from other tabs
+    }
+    const newUrl = details.url;
+    await handleNewUrl(newUrl);
 });
