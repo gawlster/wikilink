@@ -1,7 +1,7 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { clearStorage } from "../storage";
 import { getNormalizedTitle } from "../utils";
+import { clearGameStorage } from "../gameStorage";
 
 @customElement("has-won-component")
 class HasWonComponent extends LitElement {
@@ -87,6 +87,6 @@ class HasWonComponent extends LitElement {
     }
 
     private async backToHomepage() {
-        await clearStorage();
+        await clearGameStorage();
     }
 }

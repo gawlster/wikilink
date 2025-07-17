@@ -1,11 +1,12 @@
 import { css, html, LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { getStorage, Storage, storageKeys } from "../storage";
+import { GameStorage, getGameStorage } from "../gameStorage";
+import { AuthStorage, getAuthStorage } from "../authStorage";
 
 @customElement("popup-component")
 class PopupComponent extends LitElement {
     @state()
-    private state: Storage | null = null;
+    private state: GameStorage & AuthStorage | null = null;
 
     connectedCallback() {
         super.connectedCallback();
@@ -18,8 +19,12 @@ class PopupComponent extends LitElement {
     }
 
     async fetchStateFromStorage() {
-        const storedState = await getStorage();
-        this.state = storedState;
+        const storedGameState = await getGameStorage();
+        const storedAuthState = await getAuthStorage();
+        this.state = {
+            ...storedGameState,
+            ...storedAuthState
+        };
     }
 
     static styles = css`
@@ -54,7 +59,9 @@ h1 {
         if (this.state === null) {
             return html`<p>Loading...</p>`;
         }
-        if (this.state.hasWon) {
+        if (!this.state.accessToken || !this.state.refreshToken) {
+            return html`<auth-component></auth-component>`;
+        } else if (this.state.hasWon) {
             return html`<has-won-component
                 startArticleUrl=${this.state.startingArticleUrl}
                 endArticleUrl=${this.state.endingArticleUrl}

@@ -1,9 +1,8 @@
 import { validateWin } from "./communication";
-import { clearGameStorage, GameStorage, getGameStorage, updateGameStorage } from "./gameStorage";
 import { isValidActiveGame } from "./serverTypes";
 import { areArticlesTheSame } from "./utils";
 
-let currentStorage: GameStorage = {
+let currentStorage: Storage = {
     id: "",
     startingArticleUrl: "",
     endingArticleUrl: "",
@@ -13,8 +12,8 @@ let currentStorage: GameStorage = {
     tabId: -1
 }
 
-async function refetchAndSetStorage(): Promise<GameStorage> {
-    const storage = await getGameStorage();
+async function refetchAndSetStorage(): Promise<Storage> {
+    const storage = await getStorage();
     currentStorage = storage;
     return currentStorage;
 }
@@ -31,9 +30,9 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
             chrome.tabs.create({ url: game.startingArticleUrl }, async (tab) => {
                 if (chrome.runtime.lastError) {
                     console.error("Error opening tab:", chrome.runtime.lastError);
-                    await clearGameStorage();
+                    await clearStorage();
                 } else {
-                    currentStorage = await updateGameStorage({
+                    currentStorage = await updateStorage({
                         id: game.id,
                         startingArticleUrl: game.startingArticleUrl,
                         endingArticleUrl: game.endingArticleUrl,
@@ -73,7 +72,7 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
             title: "Game Over",
             message: "You have closed the game tab. The game has ended. You may start a new game from the extension popup."
         })
-        await clearGameStorage();
+        await clearStorage();
     }
 });
 
@@ -89,7 +88,7 @@ chrome.webNavigation.onCommitted.addListener(async (details) => {
     if (currentStorage.visitedUrls[currentStorage.visitedUrls.length - 1] === newUrl) {
         return; // Ignore if the URL is the same as the last visited URL
     }
-    currentStorage = await updateGameStorage({
+    currentStorage = await updateStorage({
         visitedUrls: [...currentStorage.visitedUrls, newUrl]
     })
     if (areArticlesTheSame(newUrl, currentStorage.endingArticleUrl)) {

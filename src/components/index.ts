@@ -1,4 +1,5 @@
 import "./styled";
+import "./auth";
 
 import "./popupComponent";
 import "./hasWonComponent";

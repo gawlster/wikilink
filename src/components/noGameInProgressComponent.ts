@@ -31,6 +31,7 @@ class NoGameInProgressComponent extends LitElement {
     <p>You may open another tab for information.</p>
     <p>Once you reach the target article, you win!</p>
     <p>Closing the game tab ends the game.</p>
+    <p>Games will expire after 1 hour of inactivity.</p>
     <p>Good luck!</p>
 </div>
 <div class="content">

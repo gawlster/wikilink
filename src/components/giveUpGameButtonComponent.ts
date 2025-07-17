@@ -1,6 +1,6 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { clearStorage } from "../storage";
+import { clearGameStorage } from "../gameStorage";
 
 @customElement("give-up-game-button-component")
 class GiveUpGameButtonComponent extends LitElement {
@@ -23,15 +23,12 @@ class GiveUpGameButtonComponent extends LitElement {
             background-color: #45a049;
         }
     `;
-    async giveUp() {
-        await clearStorage();
-    }
     render() {
         return html`
 <styled-button
     buttonType="danger"
     label=${this.buttonText}
-    .onClick=${async () => await this.giveUp()}
+    .onClick=${async () => await clearGameStorage()}
 >
 </styled-button>`;
     }
