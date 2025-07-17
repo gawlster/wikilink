@@ -1,8 +1,15 @@
 import { css, html, LitElement } from "lit";
-import { customElement } from "lit/decorators.js";
+import { customElement, state } from "lit/decorators.js";
 
 @customElement("no-game-in-progress-component")
 class NoGameInProgressComponent extends LitElement {
+    @state()
+    private seed: string = "";
+    private onSeedInput(e: Event) {
+        const input = e.target as HTMLInputElement;
+        this.seed = input.value;
+    }
+
     static styles = css`
 :host {
     display: flex;
@@ -36,10 +43,21 @@ class NoGameInProgressComponent extends LitElement {
 </div>
 <div class="content">
     <div class="input-pair">
-        <label for="difficulty">Select difficulty</label>
-        <styled-range-input id="difficulty"></styled-range-input>
+        <label for="seed">Play a seeded game:</label>
+        <input
+            type="text"
+            id="seed"
+            name="seed"
+            required
+            .value=${this.seed}
+            @input=${this.onSeedInput}
+        >
     </div>
-    <start-game-button-component buttonText="Start Game" fullWidth=${true}></start-game-button-component>
+    <start-game-button-component
+        buttonText="Start Game"
+        fullWidth=${true}
+        .seed=${this.seed}
+    ></start-game-button-component>
 </div>
 `;
     }

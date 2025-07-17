@@ -7,3 +7,4 @@ import "./gameInProgressComponent";
 import "./noGameInProgressComponent";
 import "./startGameButtonComponent";
 import "./giveUpGameButtonComponent";
+import "./createSeedFormComponent";

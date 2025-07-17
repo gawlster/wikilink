@@ -42,6 +42,33 @@ export async function startNewGame() {
     }
 }
 
+export async function startNewGameFromSeed(seedId: string) {
+    try {
+        const response = await fetch(`${getAPIRootUrl()}/active/startFromSeed`, {
+            method: "POST",
+            headers: await getHeadersWithAuth({
+                "Content-Type": "application/json"
+            }),
+            body: JSON.stringify({ seedId })
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to start new game from seed: ${response.statusText}`);
+        }
+        const activeGame = await response.json();
+        if (!isValidActiveGame(activeGame)) {
+            throw new Error("Invalid response from server when starting a new game from seed.");
+        }
+        await updateGameStorage(activeGame);
+        return activeGame;
+    } catch (error) {
+        console.error("Error starting new game from seed: ", error);
+        if (error instanceof Error && error.message.includes("Unauthorized")) {
+            await updateAuthStorage({ accessToken: "", refreshToken: "" });
+        }
+        throw error;
+    }
+}
+
 export async function validateWin(id: string, visitedUrls: string[]) {
     try {
         const response = await fetch(`${getAPIRootUrl()}/active/validateWin`, {
@@ -108,6 +135,37 @@ export async function register(email: string, password: string, confirmPassword:
         await updateAuthStorage({ accessToken, refreshToken });
     } catch (error) {
         console.error("Error during registration:", error);
+        if (error instanceof Error && error.message.includes("Unauthorized")) {
+            await updateAuthStorage({ accessToken: "", refreshToken: "" });
+        }
+        throw error;
+    }
+}
+
+export async function createSeed(startingArticleUrl: string, endingArticleUrl: string, minSteps: number, category: string) {
+    try {
+        const response = await fetch(`${getAPIRootUrl()}/admin/createSeed`, {
+            method: "POST",
+            headers: await getHeadersWithAuth({
+                "Content-Type": "application/json"
+            }),
+            body: JSON.stringify({
+                startingArticleUrl,
+                endingArticleUrl,
+                minSteps,
+                category
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to create seed: ${response.statusText}`);
+        }
+        const seed = await response.json();
+        if (!seed || !seed.id) {
+            throw new Error("Invalid seed response from server.");
+        }
+        return seed;
+    } catch (error) {
+        console.error("Error creating seeded game:", error);
         if (error instanceof Error && error.message.includes("Unauthorized")) {
             await updateAuthStorage({ accessToken: "", refreshToken: "" });
         }
