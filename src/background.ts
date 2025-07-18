@@ -1,6 +1,7 @@
 import { AuthStorage, getAuthStorage } from "./authStorage";
 import { validateWin } from "./communication";
 import { clearGameStorage, GameStorage, getGameStorage, updateGameStorage } from "./gameStorage";
+import { closedTabNotification, gameStartedNotification, gameWonNotification, invalidGameNotification } from "./notifications";
 import { isValidActiveGame } from "./serverTypes";
 import { areArticlesTheSame } from "./utils";
 
@@ -49,19 +50,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
                         hasWon: false,
                         tabId: tab.id || -1
                     });
-                    chrome.notifications.create({
-                        type: "list",
-                        iconUrl: "../icons/icon128.png",
-                        title: "Game Started",
-                        message: "You have started a new game! Here are the rules:",
-                        items: [
-                            { title: "1", message: "Navigate by clicking links only." },
-                            { title: "2", message: "Reach the target article in the least steps." },
-                            { title: "3", message: "You may open another tab for information." },
-                            { title: "4", message: "Once you reach the target article, you win!" },
-                            { title: "5", message: "Closing the game tab ends the game." }
-                        ]
-                    });
+                    gameStartedNotification(game.startingArticleUrl, game.endingArticleUrl, game.minSteps);
                 }
             });
             break;
@@ -74,12 +63,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
     await refetchAndSetStorage();
     if (!currentGameStorage.hasWon && tabId === currentGameStorage.tabId) {
-        chrome.notifications.create({
-            type: "basic",
-            iconUrl: "../icons/icon128.png",
-            title: "Game Over",
-            message: "You have closed the game tab. The game has ended. You may start a new game from the extension popup."
-        })
+        closedTabNotification();
         let gameStorage = await getGameStorage();
         let authStorage = await getAuthStorage();
         await clearGameStorage();
@@ -98,13 +82,9 @@ async function handleNewUrl(newUrl: string) {
     if (areArticlesTheSame(newUrl, currentGameStorage.endingArticleUrl)) {
         try {
             await validateWin(currentGameStorage.id, currentGameStorage.visitedUrls);
+            gameWonNotification(currentGameStorage.visitedUrls.length - 1);
         } catch (error) {
-            chrome.notifications.create({
-                type: "basic",
-                iconUrl: "../icons/icon128.png",
-                title: "Error",
-                message: "Your game was not validated successfully. Your score will be discarded. Please ensure you read and follow all the rules of the game."
-            });
+            invalidGameNotification();
             return;
         }
     }

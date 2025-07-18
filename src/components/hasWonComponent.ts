@@ -61,6 +61,11 @@ class HasWonComponent extends LitElement {
     height: 1px;
     background-color: #223344;
 }
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 `
 
     render() {
@@ -87,17 +92,19 @@ class HasWonComponent extends LitElement {
         <p class="value">${this.minSteps}</p>
     </div>
 </div>
-<create-random-seed-button-component
-    gameId=${this.gameId}
-    createdFromSeed=${this.createdFromSeed}
-    newlyCreatedSeed=${this.newlyCreatedSeed}
-></create-random-seed-button-component>
-<styled-button
-    buttonType="primary"
-    label="Back to Homepage"
-    .onClick=${() => this.backToHomepage()}
->
-</styled-button>
+<div class="buttons">
+    <create-random-seed-button-component
+        gameId=${this.gameId}
+        createdFromSeed=${this.createdFromSeed}
+        newlyCreatedSeed=${this.newlyCreatedSeed}
+    ></create-random-seed-button-component>
+    <styled-button
+        buttonType="primary"
+        label="Back to Homepage"
+        .onClick=${() => this.backToHomepage()}
+    >
+    </styled-button>
+</div>
 `;
     }
 

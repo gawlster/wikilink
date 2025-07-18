@@ -29,7 +29,7 @@ class CreateRandomSeedButtonComponent extends LitElement {
         }
         return html`
 <styled-button
-    buttonType="primary"
+    buttonType="ghost"
     label="Create Seed for this Game"
     .onClick=${() => this.handleSubmit()}
 >
