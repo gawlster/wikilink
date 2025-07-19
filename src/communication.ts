@@ -3,8 +3,8 @@ import { updateGameStorage } from "./gameStorage";
 import { isValidActiveGame } from "./serverTypes";
 
 function getAPIRootUrl() {
-    // return "https://wikilink-mu.vercel.app/api"
-    return "http://localhost:3000/api"
+    return "https://wikilink-mu.vercel.app/api"
+    // return "http://localhost:3000/api"
 }
 
 async function getHeadersWithAuth(headers: object = {}) {
