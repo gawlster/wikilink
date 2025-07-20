@@ -12,3 +12,4 @@ import "./createRandomSeedButtonComponent";
 import "./errorListComponent";
 import "./errorComponent";
 import "./githubLinkComoponent";
+import "./seededInfoTooltip";

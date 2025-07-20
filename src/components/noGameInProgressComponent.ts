@@ -37,7 +37,7 @@ class NoGameInProgressComponent extends LitElement {
     <p>Good luck!</p>
 </div>
 <div class="input-pair">
-    <label for="seed">Play a seeded game:</label>
+    <label for="seed">Play a seeded game: <seeded-info-tooltip></seeded-info-tooltip></label>
     <input
         type="text"
         id="seed"
