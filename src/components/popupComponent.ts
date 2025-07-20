@@ -93,6 +93,12 @@ h1 {
     color: #223344;
     font-weight: bold;
 }
+.github-link {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+}
 `;
 
     private getMainComponent() {
@@ -127,6 +133,7 @@ h1 {
     render() {
         return html`
 <h1>WikiLink</h1>
+<github-link-component class="github-link"></github-link-component>
 <error-list-component></error-list-component>
 <div class="inner">
     ${this.getMainComponent()}
