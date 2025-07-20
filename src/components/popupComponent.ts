@@ -132,8 +132,8 @@ h1 {
 
     render() {
         return html`
+<hamburger-menu-component></hamburger-menu-component>
 <h1>WikiLink</h1>
-<github-link-component class="github-link"></github-link-component>
 <error-list-component></error-list-component>
 <div class="inner">
     ${this.getMainComponent()}

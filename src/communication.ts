@@ -158,6 +158,20 @@ export async function register(email: string, password: string, confirmPassword:
     return response;
 }
 
+export async function logout() {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/auth/logout`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        },
+        isEmptyObject
+    )
+    return response;
+}
+
 export async function createSeed(startingArticleUrl: string, endingArticleUrl: string, minSteps: number, category: string) {
     const response = await doFetch(
         `${getAPIRootUrl()}/admin/createSeed`,

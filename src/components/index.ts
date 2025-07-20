@@ -13,3 +13,4 @@ import "./errorListComponent";
 import "./errorComponent";
 import "./githubLinkComoponent";
 import "./seededInfoTooltip";
+import "./hamburgerMenuComponent";
