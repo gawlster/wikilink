@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { customElement, property, queryAssignedElements } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 @customElement("styled-tooltip")
 export class StyledTooltip extends LitElement {
