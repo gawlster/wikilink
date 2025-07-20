@@ -29,7 +29,7 @@ class HamburgerMenuComponent extends LitElement {
     }
 
     static styles = css`
-.source-code-button {
+.margin-link {
     margin-top: 16px;
 }
 `
@@ -45,11 +45,17 @@ class HamburgerMenuComponent extends LitElement {
     >
     </styled-button>
     <styled-button
-        class="source-code-button"
+        class="margin-link"
         buttonType="link"
         label="Source Code"
         .onClick=${() => this.handleOpenSourceCode()}
     >
+    </styled-button>
+    <styled-button
+        class="margin-link"
+        buttonType="link"
+        label="Provide Feedback"
+        .onClick=${() => this.handleOpenFeedback()}
     </styled-button>
 </styled-hamburger-menu>
             `;
@@ -62,6 +68,12 @@ class HamburgerMenuComponent extends LitElement {
     private handleOpenSourceCode() {
         chrome.tabs.create({
             url: "https://github.com/gawlster/wikilink-client"
+        })
+    }
+
+    private handleOpenFeedback() {
+        chrome.tabs.create({
+            url: "https://forms.gle/4xWNBD1PoE6n5qwz8"
         })
     }
 }
