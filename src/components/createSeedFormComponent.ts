@@ -97,15 +97,13 @@ class CreateSeedFormComponent extends LitElement {
     }
 
     private async handleSubmit() {
-        try {
-            await createSeed(this.startArticle, this.endArticle, this.steps, this.category);
-            this.startArticle = "";
-            this.endArticle = "";
-            this.steps = 0;
-            this.category = "";
-        } catch (error) {
-            console.error("Seed creation failed:", error);
-            // Handle login failure (e.g., show an error message)
+        const { success } = await createSeed(this.startArticle, this.endArticle, this.steps, this.category);
+        if (!success) {
+            return;
         }
+        this.startArticle = "";
+        this.endArticle = "";
+        this.steps = 0;
+        this.category = "";
     }
 }

@@ -9,3 +9,5 @@ import "./startGameButtonComponent";
 import "./giveUpGameButtonComponent";
 import "./createSeedFormComponent";
 import "./createRandomSeedButtonComponent";
+import "./errorListComponent";
+import "./errorComponent";

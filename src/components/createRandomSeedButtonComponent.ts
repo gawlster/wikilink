@@ -38,11 +38,6 @@ class CreateRandomSeedButtonComponent extends LitElement {
     }
 
     private async handleSubmit() {
-        try {
-            await createSeedFromCompletedGame(this.gameId);
-        } catch (error) {
-            console.error("Seed creation from completed game failed:", error);
-            // Handle login failure (e.g., show an error message)
-        }
+        await createSeedFromCompletedGame(this.gameId);
     }
 }

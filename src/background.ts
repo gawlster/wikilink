@@ -80,13 +80,12 @@ async function handleNewUrl(newUrl: string) {
         visitedUrls: [...currentGameStorage.visitedUrls, newUrl]
     })
     if (areArticlesTheSame(newUrl, currentGameStorage.endingArticleUrl)) {
-        try {
-            await validateWin(currentGameStorage.id, currentGameStorage.visitedUrls);
-            gameWonNotification(currentGameStorage.visitedUrls.length - 1);
-        } catch (error) {
+        const { success } = await validateWin(currentGameStorage.id, currentGameStorage.visitedUrls);
+        if (!success) {
             invalidGameNotification();
             return;
         }
+        gameWonNotification(currentGameStorage.visitedUrls.length - 1);
     }
 }
 

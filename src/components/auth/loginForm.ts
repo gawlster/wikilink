@@ -77,11 +77,6 @@ class LoginFormComponent extends LitElement {
     }
 
     private async handleSubmit() {
-        try {
-            await login(this.email, this.password);
-        } catch (error) {
-            console.error("Login failed:", error);
-            // Handle login failure (e.g., show an error message)
-        }
+        await login(this.email, this.password);
     }
 }
