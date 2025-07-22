@@ -16,7 +16,7 @@ export class StyledHamburgerMenu extends LitElement {
 
 .hamburger {
     width: 15px;
-    height: 11px;
+    height: 12px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -32,7 +32,7 @@ export class StyledHamburgerMenu extends LitElement {
 }
 
 .bar1.open {
-    transform: translateY(4.5px) rotate(45deg);
+    transform: translateY(5px) rotate(45deg);
 }
 
 .bar2.open {
@@ -40,7 +40,7 @@ export class StyledHamburgerMenu extends LitElement {
 }
 
 .bar3.open {
-    transform: translateY(-4.5px) rotate(-45deg);
+    transform: translateY(-5px) rotate(-45deg);
 }
 
 .menu {

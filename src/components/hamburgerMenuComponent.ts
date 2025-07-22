@@ -32,6 +32,14 @@ class HamburgerMenuComponent extends LitElement {
 .margin-link {
     margin-top: 16px;
 }
+.version {
+    width: 100%;
+    text-align: center;
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 16px;
+    margin-bottom: 0;
+}
 `
 
     render() {
@@ -56,7 +64,9 @@ class HamburgerMenuComponent extends LitElement {
         buttonType="link"
         label="Provide Feedback"
         .onClick=${() => this.handleOpenFeedback()}
+    >
     </styled-button>
+    <p class="version">Version ${chrome.runtime.getManifest().version}</p>
 </styled-hamburger-menu>
             `;
     }
