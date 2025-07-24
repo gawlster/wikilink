@@ -10,7 +10,6 @@ class ErrorListComponent extends LitElement {
     private async fetchErrorsFromStorage() {
         super.connectedCallback();
         const errorStorage = await getErrorStorage();
-        console.log("Changing state: ", errorStorage?.errors);
         this.errors = errorStorage?.errors || [];
     }
 

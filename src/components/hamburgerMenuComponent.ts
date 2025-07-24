@@ -10,11 +10,9 @@ class HamburgerMenuComponent extends LitElement {
     private async checkIfLoggedIn() {
         const authStorage = await getAuthStorage();
         if (authStorage.accessToken) {
-            console.log("User is logged in");
             this.isLoggedIn = true;
         }
         else {
-            console.log("User is not logged in");
             this.isLoggedIn = false;
         }
     }
