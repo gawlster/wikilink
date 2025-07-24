@@ -66,7 +66,7 @@ class HamburgerMenuComponent extends LitElement {
         .onClick=${() => this.handleOpenFeedback()}
     >
     </styled-button>
-    <p class="version">Version ${chrome.runtime.getManifest().version}</p>
+    <p class="version">Beta Version ${chrome.runtime.getManifest().version}</p>
 </styled-hamburger-menu>
             `;
     }
