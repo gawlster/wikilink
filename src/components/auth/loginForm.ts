@@ -7,6 +7,9 @@ class LoginFormComponent extends LitElement {
     @property({ attribute: false, type: Function })
     switchToRegister: () => void = () => { };
 
+    @property({ attribute: false, type: Function })
+    switchToRequestPasswordReset: () => void = () => { };
+
     @state()
     private email: string = "";
     private onEmailInput(e: Event) {
@@ -36,6 +39,12 @@ class LoginFormComponent extends LitElement {
 
 .switch-form {
     cursor: pointer;
+}
+
+.extra-links {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
 }
 `
 
@@ -72,7 +81,10 @@ class LoginFormComponent extends LitElement {
     .onClick=${() => this.handleSubmit()}
 >
 </styled-button>
-<p class="switch-form" @click=${this.switchToRegister}>Register instead</p>
+<div class="extra-links">
+    <p class="switch-form" @click=${this.switchToRegister}>Register instead</p>
+    <p class="switch-form" @click=${this.switchToRequestPasswordReset}>Forgot password</p>
+</div>
 `;
     }
 

@@ -209,3 +209,39 @@ export async function createSeedFromCompletedGame(gameId: string) {
     }
     return response;
 }
+
+export async function requestResetPasswordCode(email: string) {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/auth/resetPassword/sendCode`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email })
+        },
+        isEmptyObject
+    );
+    if (response.success) {
+        await updateAuthStorage({ resettingPasswordForEmail: email });
+    }
+    return response;
+}
+
+export async function resetPassword(email: string, otpCode: string, newPassword: string) {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/auth/resetPassword/verifyCode`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, code: otpCode, newPassword })
+        },
+        isEmptyObject
+    );
+    if (response.success) {
+        await updateAuthStorage({ resettingPasswordForEmail: "" });
+    }
+    return response;
+}

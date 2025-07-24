@@ -106,7 +106,7 @@ h1 {
             return html`<p>Loading...</p>`;
         }
         if (!this.state.accessToken || !this.state.refreshToken) {
-            return html`<auth-component></auth-component>`;
+            return html`<auth-component resettingPasswordForEmail=${this.state.resettingPasswordForEmail}></auth-component>`;
         } else if (this.state.hasWon) {
             return html`<has-won-component
                 startArticleUrl=${this.state.startingArticleUrl}
