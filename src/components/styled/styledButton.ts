@@ -1,7 +1,7 @@
 import { css, html, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 
-type ButtonType = "primary" | "danger" | "ghost";
+type ButtonType = "primary" | "danger" | "ghost" | "link";
 
 @customElement("styled-button")
 class StyledButton extends LitElement {
@@ -72,9 +72,29 @@ button[buttonType="danger"]:hover {
 button[buttonType="danger"]:active {
     background-color: #8f2e2a;
 }
+button[buttonType="link"] {
+    background: none;
+    color: #333;
+    border: none;
+    padding: 0;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button[buttonType="link"]:hover {
+    color: #000;
+}
+
+button[buttonType="link"]:active {
+    color: #555;
+}
 button:disabled {
     background-color: #dcdcdc;
     cursor: not-allowed;
+}
+button:disabled:hover {
+    background-color: #dcdcdc;
+    color: #666;
 }
 button[loading] {
     cursor: wait;

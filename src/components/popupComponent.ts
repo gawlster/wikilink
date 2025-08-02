@@ -8,6 +8,8 @@ class PopupComponent extends LitElement {
     @state()
     private state: GameStorage & AuthStorage | null = null;
 
+    private resizeObserver?: ResizeObserver;
+
     connectedCallback() {
         super.connectedCallback();
         this.fetchStateFromStorage();
@@ -16,6 +18,12 @@ class PopupComponent extends LitElement {
                 this.fetchStateFromStorage();
             }
         });
+
+        // watch resizes to change the popup size
+        this.resizeObserver = new ResizeObserver(() => {
+            this.resizePopupToContent();
+        });
+        this.resizeObserver.observe(this);
     }
 
     async fetchStateFromStorage() {
@@ -25,6 +33,37 @@ class PopupComponent extends LitElement {
             ...storedGameState,
             ...storedAuthState
         };
+    }
+
+
+    disconnectedCallback() {
+        this.resizeObserver?.disconnect();
+        super.disconnectedCallback();
+    }
+    updated() {
+        this.resizePopupToContent();
+    }
+    private resizePopupToContent() {
+        const body = document.body;
+        const html = document.documentElement;
+
+        const width = Math.max(
+            body.scrollWidth,
+            body.offsetWidth,
+            html.clientWidth,
+            html.scrollWidth,
+            html.offsetWidth
+        );
+
+        const height = Math.max(
+            body.scrollHeight,
+            body.offsetHeight,
+            html.clientHeight,
+            html.scrollHeight,
+            html.offsetHeight
+        );
+
+        window.resizeTo(width, height);
     }
 
     static styles = css`
@@ -54,6 +93,12 @@ h1 {
     color: #223344;
     font-weight: bold;
 }
+.github-link {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+}
 `;
 
     private getMainComponent() {
@@ -61,7 +106,7 @@ h1 {
             return html`<p>Loading...</p>`;
         }
         if (!this.state.accessToken || !this.state.refreshToken) {
-            return html`<auth-component></auth-component>`;
+            return html`<auth-component resettingPasswordForEmail=${this.state.resettingPasswordForEmail}></auth-component>`;
         } else if (this.state.hasWon) {
             return html`<has-won-component
                 startArticleUrl=${this.state.startingArticleUrl}
@@ -87,7 +132,9 @@ h1 {
 
     render() {
         return html`
+<hamburger-menu-component></hamburger-menu-component>
 <h1>WikiLink</h1>
+<error-list-component></error-list-component>
 <div class="inner">
     ${this.getMainComponent()}
 </div>

@@ -1,10 +1,12 @@
 export type AuthStorage = {
     accessToken: string;
     refreshToken: string;
+    resettingPasswordForEmail: string;
 }
 export const authStorageKeys = [
     "accessToken",
-    "refreshToken"
+    "refreshToken",
+    "resettingPasswordForEmail"
 ] as const;
 
 export async function updateAuthStorage(newStorage: Partial<AuthStorage>): Promise<AuthStorage> {
@@ -21,7 +23,8 @@ export async function updateAuthStorage(newStorage: Partial<AuthStorage>): Promi
 export async function getAuthStorage(): Promise<AuthStorage> {
     const baseStorage: AuthStorage = {
         accessToken: "",
-        refreshToken: ""
+        refreshToken: "",
+        resettingPasswordForEmail: ""
     }
     const storedData = await chrome.storage.local.get(authStorageKeys);
     return {
@@ -33,7 +36,8 @@ export async function getAuthStorage(): Promise<AuthStorage> {
 export async function clearAuthStorage(): Promise<void> {
     const baseStorage: AuthStorage = {
         accessToken: "",
-        refreshToken: ""
+        refreshToken: "",
+        resettingPasswordForEmail: ""
     }
     await chrome.storage.local.set(baseStorage);
 }

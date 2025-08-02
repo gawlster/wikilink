@@ -96,11 +96,6 @@ class RegisterFormComponent extends LitElement {
     }
 
     private async handleSubmit() {
-        try {
-            await register(this.email, this.password, this.confirmPassword);
-        } catch (error) {
-            console.error("Login failed:", error);
-            // Handle login failure (e.g., show an error message)
-        }
+        await register(this.email, this.password, this.confirmPassword);
     }
 }

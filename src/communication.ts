@@ -1,6 +1,8 @@
 import { getAuthStorage, updateAuthStorage } from "./authStorage";
+import { appendErrorToStorage } from "./errorStorage";
 import { updateGameStorage } from "./gameStorage";
-import { isValidActiveGame } from "./serverTypes";
+import { ActiveGame, isValidActiveGame, isValidSeed } from "./serverTypes";
+import { isEmptyObject } from "./utils";
 
 function getAPIRootUrl() {
     return "https://wikilink-mu.vercel.app/api"
@@ -22,187 +24,224 @@ async function storeAuthTokens(response: Response) {
     await updateAuthStorage({ accessToken, refreshToken });
 }
 
-export async function startNewGame() {
+async function handleErrorStorage(error: unknown) {
+    const errorId = crypto.randomUUID();
+    let errorMessage = "An unknown error occurred";
+    let errorCode = "UNKNOWN_ERROR";
+    if (error instanceof Error) {
+        errorMessage = error.message;
+        errorCode = error.name;
+    }
+    await appendErrorToStorage({ id: errorId, code: errorCode, message: errorMessage });
+}
+
+type ServerResponse<T> = {
+    success: true;
+    json: T;
+} | {
+    success: false;
+    json: { error: string };
+}
+
+export async function doFetch<T>(url: string, options: RequestInit = {}, responseValidator: (json: any) => json is T): Promise<ServerResponse<T>> {
     try {
-        const response = await fetch(`${getAPIRootUrl()}/active/start`, {
-            method: "POST",
-            headers: await getHeadersWithAuth({
-                "Content-Type": "application/json"
-            })
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                ...options.headers,
+                ...await getHeadersWithAuth(options.headers)
+            }
         });
         await storeAuthTokens(response);
+        const json = await response.json();
         if (!response.ok) {
-            throw new Error(`Failed to start new game: ${response.statusText}`);
+            if (!json || typeof json !== "object" || !("message" in json) || typeof json.message !== "string") {
+                throw new Error(`Fetch failed with status ${response.status}: ${response.statusText}`);
+            }
+            throw new Error(json.message)
         }
-        const activeGame = await response.json();
-        if (!isValidActiveGame(activeGame)) {
-            throw new Error("Invalid response from server when starting a new game.");
+        if (!responseValidator(json)) {
+            throw new Error("Invalid response format from server.");
         }
-        await updateGameStorage(activeGame);
-        return activeGame;
+        return { success: true, json };
     } catch (error) {
-        console.error("Error starting new game:", error);
+        console.error(`Error during fetch on endpoint ${url}: ${error}`);
         if (error instanceof Error && error.message.includes("Unauthorized")) {
             await updateAuthStorage({ accessToken: "", refreshToken: "" });
         }
-        throw error;
+        handleErrorStorage(error);
+        return { success: false, json: { error: error instanceof Error ? error.message : "Unknown error" } };
     }
+
+}
+
+export async function startNewGame() {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/active/start`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        },
+        isValidActiveGame
+    );
+    if (response.success) {
+        await updateGameStorage(response.json);
+    }
+    return response;
 }
 
 export async function startNewGameFromSeed(seedId: string) {
-    try {
-        const response = await fetch(`${getAPIRootUrl()}/active/startFromSeed`, {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/active/startFromSeed`,
+        {
             method: "POST",
-            headers: await getHeadersWithAuth({
+            headers: {
                 "Content-Type": "application/json"
-            }),
+            },
             body: JSON.stringify({ seedId })
-        });
-        await storeAuthTokens(response);
-        if (!response.ok) {
-            throw new Error(`Failed to start new game from seed: ${response.statusText}`);
-        }
-        const activeGame = await response.json();
-        if (!isValidActiveGame(activeGame)) {
-            throw new Error("Invalid response from server when starting a new game from seed.");
-        }
-        await updateGameStorage(activeGame);
-        return activeGame;
-    } catch (error) {
-        console.error("Error starting new game from seed: ", error);
-        if (error instanceof Error && error.message.includes("Unauthorized")) {
-            await updateAuthStorage({ accessToken: "", refreshToken: "" });
-        }
-        throw error;
+        },
+        isValidActiveGame
+    );
+    if (response.success) {
+        await updateGameStorage(response.json);
     }
+    return response;
 }
 
 export async function validateWin(id: string, visitedUrls: string[]) {
-    try {
-        const response = await fetch(`${getAPIRootUrl()}/active/validateWin`, {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/active/validateWin`,
+        {
             method: "POST",
-            headers: await getHeadersWithAuth({
+            headers: {
                 "Content-Type": "application/json"
-            }),
+            },
             body: JSON.stringify({ id, visitedUrls })
-        });
-        await storeAuthTokens(response);
-        if (!response.ok) {
-            throw new Error(`Failed to validate win: ${response.statusText}`);
-        }
+        },
+        isEmptyObject
+    );
+    if (response.success) {
         await updateGameStorage({ hasWon: true });
-    } catch (error) {
-        console.error("Error validating win:", error);
-        if (error instanceof Error && error.message.includes("Unauthorized")) {
-            await updateAuthStorage({ accessToken: "", refreshToken: "" });
-        }
-        throw error;
     }
+    return response;
 }
 
 export async function login(email: string, password: string) {
-    try {
-        const response = await fetch(`${getAPIRootUrl()}/auth/login`, {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/auth/login`,
+        {
             method: "POST",
-            headers: await getHeadersWithAuth({
+            headers: {
                 "Content-Type": "application/json"
-            }),
+            },
             body: JSON.stringify({ email, password })
-        });
-        await storeAuthTokens(response);
-        if (!response.ok) {
-            throw new Error(`Login failed: ${response.statusText}`);
-        }
-    } catch (error) {
-        console.error("Error during login:", error);
-        if (error instanceof Error && error.message.includes("Unauthorized")) {
-            await updateAuthStorage({ accessToken: "", refreshToken: "" });
-        }
-        throw error;
-    }
+        },
+        isEmptyObject
+    );
+    return response;
 }
 
 export async function register(email: string, password: string, confirmPassword: string) {
-    if (password !== confirmPassword) {
-        throw new Error("Passwords do not match.");
-    }
-    try {
-        const response = await fetch(`${getAPIRootUrl()}/auth/register`, {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/auth/register`,
+        {
             method: "POST",
-            headers: await getHeadersWithAuth({
+            headers: {
                 "Content-Type": "application/json"
-            }),
+            },
             body: JSON.stringify({ email, password, confirmPassword })
-        });
-        await storeAuthTokens(response);
-        if (!response.ok) {
-            throw new Error(`Registration failed: ${response.statusText}`);
-        }
-    } catch (error) {
-        console.error("Error during registration:", error);
-        if (error instanceof Error && error.message.includes("Unauthorized")) {
-            await updateAuthStorage({ accessToken: "", refreshToken: "" });
-        }
-        throw error;
-    }
+        },
+        isEmptyObject
+    );
+    return response;
+}
+
+export async function logout() {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/auth/logout`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        },
+        isEmptyObject
+    )
+    return response;
 }
 
 export async function createSeed(startingArticleUrl: string, endingArticleUrl: string, minSteps: number, category: string) {
-    try {
-        const response = await fetch(`${getAPIRootUrl()}/admin/createSeed`, {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/admin/createSeed`,
+        {
             method: "POST",
-            headers: await getHeadersWithAuth({
+            headers: {
                 "Content-Type": "application/json"
-            }),
+            },
             body: JSON.stringify({
                 startingArticleUrl,
                 endingArticleUrl,
                 minSteps,
                 category
             })
-        });
-        await storeAuthTokens(response);
-        if (!response.ok) {
-            throw new Error(`Failed to create seed: ${response.statusText}`);
-        }
-        const seed = await response.json();
-        if (!seed || !seed.id) {
-            throw new Error("Invalid seed response from server.");
-        }
-        return seed;
-    } catch (error) {
-        console.error("Error creating seeded game:", error);
-        if (error instanceof Error && error.message.includes("Unauthorized")) {
-            await updateAuthStorage({ accessToken: "", refreshToken: "" });
-        }
-        throw error;
-    }
+        },
+        isValidSeed
+    );
+    return response;
 }
 
 export async function createSeedFromCompletedGame(gameId: string) {
-    try {
-        const response = await fetch(`${getAPIRootUrl()}/seed/createFromCompletedGame`, {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/seed/createFromCompletedGame`,
+        {
             method: "POST",
-            headers: await getHeadersWithAuth({
+            headers: {
                 "Content-Type": "application/json"
-            }),
+            },
             body: JSON.stringify({ gameId })
-        });
-        await storeAuthTokens(response);
-        if (!response.ok) {
-            throw new Error(`Failed to create seed from completed game: ${response.statusText}`);
-        }
-        const seed = await response.json();
-        if (!seed || !seed.id) {
-            throw new Error("Invalid seed response from server.");
-        }
-        await updateGameStorage({ newlyCreatedSeed: seed.id });
-        return seed;
-    } catch (error) {
-        console.error("Error creating seed from completed game:", error);
-        if (error instanceof Error && error.message.includes("Unauthorized")) {
-            await updateAuthStorage({ accessToken: "", refreshToken: "" });
-        }
-        throw error;
+        },
+        isValidSeed
+    );
+    if (response.success) {
+        await updateGameStorage({ newlyCreatedSeed: response.json.id });
     }
+    return response;
+}
+
+export async function requestResetPasswordCode(email: string) {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/auth/resetPassword/sendCode`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email })
+        },
+        isEmptyObject
+    );
+    if (response.success) {
+        await updateAuthStorage({ resettingPasswordForEmail: email });
+    }
+    return response;
+}
+
+export async function resetPassword(email: string, otpCode: string, newPassword: string) {
+    const response = await doFetch(
+        `${getAPIRootUrl()}/auth/resetPassword/verifyCode`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, code: otpCode, newPassword })
+        },
+        isEmptyObject
+    );
+    if (response.success) {
+        await updateAuthStorage({ resettingPasswordForEmail: "" });
+    }
+    return response;
 }

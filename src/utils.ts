@@ -18,3 +18,7 @@ export function areArticlesTheSame(urlA: string, urlB: string): boolean {
     const titleB = getNormalizedTitle(urlB).toLowerCase();
     return titleA === titleB;
 }
+
+export function isEmptyObject(obj: any): obj is Record<string, never> {
+    return Object.keys(obj).length === 0 && obj.constructor === Object;
+}

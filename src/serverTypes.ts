@@ -45,3 +45,14 @@ export const completedGameKeys = [
     "steps",
     "completedAt"
 ] as const;
+
+export type Seed = {
+    id: string;
+}
+export function isValidSeed(seed: any): seed is Seed {
+    return (
+        typeof seed === 'object' &&
+        seed !== null &&
+        typeof seed.id === 'string'
+    );
+}

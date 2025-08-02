@@ -27,9 +27,17 @@ class StartGameButtonComponent extends LitElement {
     async startGame() {
         let activeGame: ActiveGame;
         if (this.seed.trim() === "") {
-            activeGame = await startNewGame();
+            const { success, json } = await startNewGame();
+            if (!success) {
+                return;
+            }
+            activeGame = json;
         } else {
-            activeGame = await startNewGameFromSeed(this.seed);
+            const { success, json } = await startNewGameFromSeed(this.seed);
+            if (!success) {
+                return;
+            }
+            activeGame = json;
         }
         await chrome.runtime.sendMessage({
             type: "gameStarted",
